@@ -1,0 +1,7 @@
+{
+  "files": [
+    {"in_vid": "1.mp4", "in_img": "1.jpg", "out_vid": "1.mp4"},
+    {"in_vid": "1.mp4", "in_img": "1.jpg", "out_vid": "2.mp4"},
+    {"in_vid": "1.mp4", "in_img": "1.jpg", "out_vid": "3.mp4"}
+  ]
+}
