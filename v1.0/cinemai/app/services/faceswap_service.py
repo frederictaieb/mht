@@ -15,22 +15,18 @@ class FaceSwapService:
         self.vid_dir = vid_dir
         self.output_dir = output_dir
 
-    def run(self, img_filename: str, vid_filename: str, output_filename: str | None = None):
+    def run(self, img_filename: str, vid_filename: str):
         self.runtime.ensure_loaded()
 
         img_path = resolve_under(self.img_dir, img_filename)
         vid_path = resolve_under(self.vid_dir, vid_filename)
 
         if not os.path.exists(img_path):
-            raise HTTPException(status_code=400, detail=f"Image introuvable: {img_path}")
+            raise HTTPException(status_code=400, detail=f"Image not found: {img_path}")
         if not os.path.exists(vid_path):
-            raise HTTPException(status_code=400, detail=f"Vidéo introuvable: {vid_path}")
+            raise HTTPException(status_code=400, detail=f"Video not found: {vid_path}")
 
-        if output_filename:
-            out_name = output_filename if output_filename.lower().endswith(".mp4") else output_filename + ".mp4"
-        else:
-            out_name = f"faceswap_{uuid.uuid4().hex}.mp4"
-
+        out_name = f"fs-{vid_filename}"
         out_path = os.path.join(self.output_dir, out_name)
         os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
