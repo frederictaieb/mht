@@ -4,7 +4,8 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Settings:
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # app/..
-    INPUT_DIR: str = os.path.join(BASE_DIR, "data/input")
+    IMG_DIR: str = os.path.join(BASE_DIR, "data/input/img")
+    VID_DIR: str = os.path.join(BASE_DIR, "data/input/vid")
     OUTPUT_DIR: str = os.path.join(BASE_DIR, "data/output")
 
     MODELS_DIR: str = os.path.join(BASE_DIR, "data/ai_models")
