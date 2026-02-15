@@ -3,10 +3,16 @@ import uuid
 import cv2
 import tempfile
 import shutil
+import logging
+import time
 from fastapi import HTTPException
 
 from app.core.paths import resolve_under
 from app.utils.faces import pick_largest_face
+
+
+
+log = logging.getLogger("uvicorn.error")
 
 class FaceSwapService:
     def __init__(self, runtime, img_dir: str, vid_dir: str, output_dir: str):
@@ -16,6 +22,9 @@ class FaceSwapService:
         self.output_dir = output_dir
 
     def run(self, img_filename: str, vid_filename: str):
+
+        rid = int(time.time() * 1000)
+        log.info("faceswap start img=%s vid=%s", img_filename, vid_filename)
         self.runtime.ensure_loaded()
 
         img_path = resolve_under(self.img_dir, img_filename)
@@ -81,6 +90,13 @@ class FaceSwapService:
 
         os.replace(tmp_out, out_path)
         shutil.rmtree(tmp_dir, ignore_errors=True)
+
+        log.info("faceswap end frames=%s swapped=%s", frame_idx, swapped_frames)
+        print(">>> RUN END", rid, frame_idx, swapped_frames)
+
+        st = os.stat(out_path)
+        log.info("output stats: path=%s size=%s mtime=%s", out_path, st.st_size, st.st_mtime)
+
 
         return {
             "output_file": out_name,

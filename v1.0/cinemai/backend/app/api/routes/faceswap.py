@@ -10,6 +10,14 @@ from app.models.faceswap import FaceSwapSingleRequest
 import uuid
 import shutil
 
+import threading
+
+# app/api/routes/faceswap.py
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+faceswap_executor = ThreadPoolExecutor(max_workers=1)
+
 router = APIRouter(prefix="/faceswap", tags=["faceswap"])
 
 runtime = InsightFaceRuntime(
@@ -21,11 +29,19 @@ runtime = InsightFaceRuntime(
 
 faceswap_service = FaceSwapService(runtime, settings.IMG_DIR, settings.VID_DIR, settings.OUTPUT_DIR)
 image_service = DirectoryService(settings.IMG_DIR, "img")
-video_service = DirectoryService(settings.IMG_DIR, "vid")
+video_service = DirectoryService(settings.VID_DIR, "vid")
+
+faceswap_executor = ThreadPoolExecutor(max_workers=1)
 
 @router.post("/single")
-def faceswap_single(payload: FaceSwapSingleRequest):
-    return faceswap_service.run(payload.img, payload.vid)
+async def faceswap_single(payload: FaceSwapSingleRequest):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(
+        faceswap_executor,
+        faceswap_service.run,
+        payload.img,
+        payload.vid
+    )
 
 @router.post("/img/list")
 def img_list():
@@ -38,3 +54,15 @@ def img_delete():
 @router.post("/img/upload")
 def img_upload(f: UploadFile = File(...)):
     return image_service.dir_upload(f)
+
+@router.post("/vid/list")
+def vid_list():
+    return video_service.dir_list()
+
+@router.post("/vid/delete")
+def vid_delete():
+    return video_service.dir_delete()
+
+@router.post("/vid/upload")
+def vid_upload(f: UploadFile = File(...)):
+    return image_service.vid_upload(f)
