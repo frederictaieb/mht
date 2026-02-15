@@ -1,52 +1,71 @@
-"use client";
+export default async function Page() {
 
-import { useState } from "react";
+  const res_available = await fetch("http://localhost:8000/faceswap/available/list", { cache: "no-store" })
+  const data_available = await res_available.json()
 
-import type { ImgListResponse } from "../types/faceswap";
-import { listImages } from "../lib/api";
+  const res_output = await fetch("http://localhost:8000/faceswap/output/list", { cache: "no-store" })
+  const data_output= await res_output.json()
 
-import { UploadPanel } from "../components/UploadPanel";
-import { DeletePanel } from "../components/DeletePanel";
-import { ImagesPanel } from "../components/ImagesPanel";
-
-export default function FaceSwapPage() {
-  const [loading, setLoading] = useState(false);
-  const [files, setFiles] = useState<string[]>([]);
-  const [error, setError] = useState<string>("");
-
-  async function refreshImages() {
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = (await listImages()) as ImgListResponse;
-      setFiles(data.files);
-    } catch (e: any) {
-      setError(e?.message ?? "Erreur lors du listing");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const clean = (files: string[]) => (files ?? []).filter(f => !f.startsWith("."))
 
   return (
-    <main style={{ padding: 20 }}>
-      <h1>FaceSwap</h1>
-      <p style={{ opacity: 0.7 }}>
-        Upload / Delete / List — architecture modulaire
-      </p>
+    <div>
+      <h1>Vidéos disponibles</h1>
 
-      <UploadPanel onUploaded={() => refreshImages()} />
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, 200px)",
+        gap: "10px"
+      }}>
 
-      <ImagesPanel
-        files={files}
-        loading={loading}
-        error={error}
-        onRefresh={refreshImages}
-      />
+        {clean(data_available.files).map((f: string) => (
 
-      <DeletePanel onDeleted={() => refreshImages()} />
+          <div key={f}>
 
+            <video
+              src={`http://localhost:8000/faceswap/available/video/${encodeURIComponent(f)}`}
+              width={200}
+              autoPlay
+              muted
+              playsInline
+              loop
+            />
 
-    </main>
-  );
+            <div>{f}</div>
+
+          </div>
+
+        ))}
+      </div>
+
+      <h1>Vidéos générées</h1>
+
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, 200px)",
+        gap: "10px"
+      }}>
+
+        {clean(data_output.files).map((f: string) => (
+
+          <div key={f}>
+
+            <video
+              src={`http://localhost:8000/faceswap/output/video/${encodeURIComponent(f)}`}
+              width={200}
+              autoPlay
+              muted
+              playsInline
+              loop
+            />
+
+            <div>{f}</div>
+
+          </div>
+
+        ))}
+
+      </div>
+    </div>
+  )
 }
