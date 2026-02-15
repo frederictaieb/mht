@@ -4,7 +4,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.core.config import settings
 from app.services.insightface_runtime import InsightFaceRuntime
 from app.services.faceswap_service import FaceSwapService
-from app.services.filemanagement_service import ImageService
+from app.services.filemanagement_service import DirectoryService
 from app.models.faceswap import FaceSwapSingleRequest
 
 import uuid
@@ -20,7 +20,8 @@ runtime = InsightFaceRuntime(
 )
 
 faceswap_service = FaceSwapService(runtime, settings.IMG_DIR, settings.VID_DIR, settings.OUTPUT_DIR)
-image_service = ImageService(settings.IMG_DIR)
+image_service = DirectoryService(settings.IMG_DIR, "img")
+video_service = DirectoryService(settings.IMG_DIR, "vid")
 
 @router.post("/single")
 def faceswap_single(payload: FaceSwapSingleRequest):
@@ -28,12 +29,12 @@ def faceswap_single(payload: FaceSwapSingleRequest):
 
 @router.post("/img/list")
 def img_list():
-    return image_service.img_list()
+    return image_service.dir_list()
 
 @router.delete("/img/delete")
 def img_delete():
-    return image_service.img_delete()
+    return image_service.dir_delete()
 
 @router.post("/img/upload")
 def img_upload(f: UploadFile = File(...)):
-    return image_service.img_upload(f)
+    return image_service.dir_upload(f)

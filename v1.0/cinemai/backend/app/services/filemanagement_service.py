@@ -3,58 +3,87 @@ import uuid
 import shutil
 from fastapi import UploadFile, File, HTTPException
 
-class ImageService:
+from enum import Enum
 
-    ALLOWED_IMAGE_MIME = {"image/jpeg", "image/png", "image/webp"}
+class DirectoryKind(str, Enum):
+    IMG = "img"
+    VID = "vid"
 
-    def __init__(self, img_dir: str):
-        self.img_dir = img_dir
+class DirectoryService:
 
-    # --- Check if img folder exists ---
-    def check_img_dir(self):
-        if not os.path.exists(self.img_dir):
-            raise HTTPException(status_code=404, detail="Dossier img introuvable")
+    def __init__(self, dir: str, kind: str):
+        self.dir = dir
 
-        if not os.path.isdir(self.img_dir):
-            raise HTTPException(status_code=400, detail="Le chemin n'est pas un dossier")
+        if kind == DirectoryKind.IMG:
+            self.ALLOWED_MIME = {"image/jpeg", "image/png"}
+            self.ALLOWED_EXT = {".jpg", ".jpeg", ".png"}
 
-    # --- List all files in input/img folder ---
-    def img_list(self):
+        elif kind == DirectoryKind.VID:
+            self.ALLOWED_MIME = {"video/mp4", "video/webm", "video/mpeg"}
+            self.ALLOWED_EXT = {".mp4",".webm",".mpg",".mpeg"}
 
-        self.check_img_dir()
+        else:
+            raise ValueError(f"Unknown kind: {kind}")
+
+    # --- Check if folder exists ---
+    def extract_ext(self, f):
+        return os.path.splitext(f.filename or "")[1].lower()
+
+    # --- Check if folder exists ---
+    def check_dir(self):
+        if not os.path.exists(self.dir):
+            raise HTTPException(status_code=404, detail="Directory not found")
+
+        if not os.path.isdir(self.dir):
+            raise HTTPException(status_code=400, detail="Path not correct")
+
+    # --- Check MIME of a file ---
+    def check_mime(self, f):
+        if f.content_type not in self.ALLOWED_MIME:
+            raise HTTPException(status_code=415, detail="MIME not authorized")
+
+    # --- Check Extension of a file ---
+    def check_ext(self, ext):
+        if ext not in self.ALLOWED_EXT:
+            raise HTTPException(status_code=415, detail="EXT not authorized")
+
+    # --- List all files in folder ---
+    def dir_list(self):
+
+        self.check_dir()
 
         # List comprehension : 
         # [ EXPRESSION  for ELEMENT in SEQUENCE  if CONDITION ]
         # I build a list containing f 
-        #   For each f in SEQUENCE : os.listdir(self.img_dir)
-        #   Only if condition: os.path.isfile(os.path.join(self.img_dir, f)) is true
+        #   For each f in SEQUENCE : os.listdir(self.dir)
+        #   Only if condition: os.path.isfile(os.path.join(self.dir, f)) is true
 
         files = [
             f 
-            for f in os.listdir(self.img_dir)
-            if os.path.isfile(os.path.join(self.img_dir, f))
+            for f in os.listdir(self.dir)
+            if os.path.isfile(os.path.join(self.dir, f))
         ]
 
         return {
-            "directory": self.img_dir,
+            "directory": self.dir,
             "type": "list",
             "count": len(files),
             "files": files
         }
 
-    # --- Delete all files in input/img folder ---
-    def img_delete(self):
+    # --- Delete all files in input/img dir ---
+    def dir_delete(self):
         # Counter of deletion
         deleted = 0
 
-        self.check_img_dir()
+        self.check_dir()
 
-        for f in os.listdir(self.img_dir):
-            # Absolute path of the current file in img folder
-            abs_f = os.path.join(self.img_dir, f)
+        for f in os.listdir(self.dir):
+            # Absolute path of the current file in img dir
+            abs_f = os.path.join(self.dir, f)
 
             try:
-                # If folder or if link cascade delete
+                # If dir or if link cascade delete
                 if os.path.isdir(abs_f) and not os.path.islink(abs_f):
                     shutil.rmtree(abs_f)
                 else:
@@ -66,28 +95,24 @@ class ImageService:
                 raise HTTPException(status_code=500, detail=f"Erreur suppression: {str(e)}")
 
         return {
-            "directory": self.img_dir,
+            "directory": self.dir,
             "type": "delete",
             "count": deleted
         }
 
     # --- Upload image ---
-    def img_upload(self, f: UploadFile = File(...)):
-        ALLOWED_MIME = {"image/jpeg", "image/png"}
-        ALLOWED_EXT = {".jpg", ".jpeg", ".png"}
+    def dir_upload(self, f: UploadFile = File(...)):
+
+        self.check_dir()
 
         # Checking Extension with split extension function
-        ext = os.path.splitext(f.filename or "")[1].lower()
-
-        if f.content_type not in ALLOWED_MIME:
-            raise ValueError("File has to be jpg, jpeg or png")
-
-        if ext not in ALLOWED_EXT:
-            raise ValueError("Incorrect file extension")
+        ext = self.extract_ext(f)
+        self.check_mime(f)
+        self.check_ext(ext)
 
         # Destination file
         safe_name = f"{uuid.uuid4().hex}{ext}"
-        abs_dest = os.path.join(self.img_dir, safe_name)
+        abs_dest = os.path.join(self.dir, safe_name)
 
         # Writing on drive
         try:
@@ -97,7 +122,7 @@ class ImageService:
             f.file.close()
 
         return {
-            "directory": self.img_dir,
+            "directory": self.dir,
             "type": "upload",
             "filename": safe_name,
         }
