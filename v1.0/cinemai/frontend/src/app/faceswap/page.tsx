@@ -1,7 +1,6 @@
 import UploadCard from "@/components/ui/UploadCard"
 
 export default async function Page() {
-
   const res_available = await fetch(
     "http://localhost:8000/faceswap/available/list",
     { cache: "no-store" }
@@ -9,18 +8,14 @@ export default async function Page() {
 
   const data_available = await res_available.json()
 
-  const clean = (files: string[]) =>
-    (files ?? []).filter((f) => !f.startsWith("."))
-
+  const clean = (files: string[]) => (files ?? []).filter((f) => !f.startsWith("."))
   const first = clean(data_available.files)[0]
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-
       <h1 className="text-2xl font-semibold">MHT</h1>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-3 items-stretch">
-
         {/* colonne 1 : video */}
         <div className="border border-black h-full overflow-hidden rounded-lg">
           {first ? (
@@ -50,9 +45,7 @@ export default async function Page() {
             className="w-full aspect-video object-cover"
           />
         </div>
-
       </div>
-
     </div>
   )
 }

@@ -11,75 +11,60 @@ type Props = {
 
 export function ImagesPanel({ files, loading, error, onRefresh }: Props) {
   return (
-    <section style={{ marginTop: 16, padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "space-between" }}>
-        <h2 style={{ margin: 0 }}>Images</h2>
-        <button onClick={onRefresh} disabled={loading} style={{ padding: "8px 12px" }}>
+    <section className="mt-4 p-4 border rounded-xl bg-white">
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Images</h2>
+
+        <button
+          onClick={onRefresh}
+          disabled={loading}
+          className="px-3 py-2 border rounded-md text-sm hover:bg-gray-100 disabled:opacity-50"
+        >
           {loading ? "Chargement..." : "Rafraîchir"}
         </button>
       </div>
 
-      <div style={{ marginTop: 12 }}>
-        {error ? (
-          <pre style={{ whiteSpace: "pre-wrap", color: "crimson" }}>{error}</pre>
-        ) : null}
+      <div className="mt-4">
 
+        {/* Error */}
+        {error && (
+          <pre className="whitespace-pre-wrap text-red-600 text-sm">
+            {error}
+          </pre>
+        )}
+
+        {/* Empty */}
         {files.length === 0 ? (
-          <p style={{ opacity: 0.7 }}>Aucune image.</p>
+          <p className="opacity-70 text-sm">Aucune image.</p>
         ) : (
-          <div
-            style={{
-              marginTop: 12,
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-              gap: 12,
-            }}
-          >
+          <div className="mt-4 grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {files.map((f) => {
               const url = `${API_BASE}/img/${encodeURIComponent(f)}`;
 
               return (
                 <div
                   key={f}
-                  style={{
-                    border: "1px solid #eee",
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    background: "white",
-                  }}
+                  className="border rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition"
                 >
-                  <div
-                    style={{
-                      width: "100%",
-                      aspectRatio: "1 / 1",
-                      background: "#f6f6f6",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {/* img classique (simple, pas besoin next/image pour commencer) */}
+                  {/* Image container */}
+                  <div className="w-full aspect-square bg-gray-100 flex items-center justify-center">
                     <img
                       src={url}
                       alt={f}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      className="max-h-full max-w-full object-contain"
                       loading="lazy"
                       onError={(e) => {
-                        // Si l’image n’est pas servie correctement, on affiche un placeholder
                         (e.currentTarget as HTMLImageElement).style.display = "none";
                       }}
                     />
                   </div>
 
-                  <div style={{ padding: 8 }}>
+                  {/* Filename */}
+                  <div className="p-2">
                     <div
-                      style={{
-                        fontFamily: "monospace",
-                        fontSize: 12,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
+                      className="font-mono text-xs truncate"
                       title={f}
                     >
                       {f}
@@ -92,11 +77,11 @@ export function ImagesPanel({ files, loading, error, onRefresh }: Props) {
         )}
       </div>
 
-      {!API_BASE ? (
-        <p style={{ marginTop: 12, fontSize: 12, color: "crimson" }}>
+      {!API_BASE && (
+        <p className="mt-4 text-xs text-red-600">
           NEXT_PUBLIC_API_BASE_URL manquant (.env.local)
         </p>
-      ) : null}
+      )}
     </section>
   );
 }
