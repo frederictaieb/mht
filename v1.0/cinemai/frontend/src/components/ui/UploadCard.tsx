@@ -18,26 +18,32 @@ type UploadResponse = {
   filename: string
 }
 
-export default function UploadCard() {
+type Props = {
+  onFileReady?: (file: File | null) => void
+}
+
+export default function UploadCard({ onFileReady }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [open, setOpen] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploadedName, setUploadedName] = useState<string | null>(null)
 
-  // Preview local
+  useEffect(() => {
+    onFileReady?.(file)
+  }, [file, onFileReady])
+
   useEffect(() => {
     if (!file) {
       setPreview(null)
       return
     }
-
     const url = URL.createObjectURL(file)
     setPreview(url)
-
     return () => URL.revokeObjectURL(url)
   }, [file])
 
@@ -85,8 +91,7 @@ export default function UploadCard() {
 
   return (
     <div className="border border-black h-full rounded-lg p-4 flex flex-col gap-4">
-
-      {/* IMAGE PREVIEW (plus petite mais cadre conservé) */}
+      {/* Preview (petite dans cadre 16:9) */}
       <div className="w-full aspect-video bg-gray-100 flex items-center justify-center rounded overflow-hidden">
         {preview ? (
           <img
@@ -101,17 +106,14 @@ export default function UploadCard() {
         )}
       </div>
 
-      {/* Status */}
       <div className="text-xs text-muted-foreground">
         {uploadedName ? `Uploadé: ${uploadedName}` : "\u00A0"}
       </div>
 
-      {/* Upload button */}
       <Button className="w-full mt-auto" onClick={() => setOpen(true)}>
         Upload
       </Button>
 
-      {/* Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
@@ -119,7 +121,6 @@ export default function UploadCard() {
           </DialogHeader>
 
           <div className="space-y-4">
-
             <input
               ref={inputRef}
               type="file"
@@ -146,9 +147,7 @@ export default function UploadCard() {
                   <span className="text-sm text-muted-foreground">
                     PNG / JPG uniquement
                   </span>
-                  <Button onClick={pickFile}>
-                    Choisir un fichier
-                  </Button>
+                  <Button onClick={pickFile}>Choisir un fichier</Button>
                 </>
               )}
             </div>
@@ -158,7 +157,6 @@ export default function UploadCard() {
                 {error}
               </div>
             )}
-
           </div>
 
           <DialogFooter className="gap-2">
@@ -170,16 +168,12 @@ export default function UploadCard() {
               Annuler
             </Button>
 
-            <Button
-              onClick={uploadToApi}
-              disabled={!file || uploading}
-            >
+            <Button onClick={uploadToApi} disabled={!file || uploading}>
               {uploading ? "Upload..." : "Uploader"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }

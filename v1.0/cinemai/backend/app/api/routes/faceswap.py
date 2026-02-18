@@ -19,6 +19,8 @@ from app.services.video_pool import VideoPool
 
 from app.utils.folder import _purge_dir, _copy_tree_contents
 
+from fastapi.responses import FileResponse
+
 # app/api/routes/faceswap.py
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -209,3 +211,10 @@ def available_list():
 @router.get("/output/list")
 def output_list():
     return output_service.dir_list()
+
+@router.get("/output/{filename}")
+def get_output(filename: str):
+    path = os.path.join(settings.OUTPUT_DIR, filename)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(path, media_type="video/mp4", filename=filename)
