@@ -1,71 +1,58 @@
+import UploadCard from "@/components/ui/UploadCard"
+
 export default async function Page() {
 
-  const res_available = await fetch("http://localhost:8000/faceswap/available/list", { cache: "no-store" })
+  const res_available = await fetch(
+    "http://localhost:8000/faceswap/available/list",
+    { cache: "no-store" }
+  )
+
   const data_available = await res_available.json()
 
-  const res_output = await fetch("http://localhost:8000/faceswap/output/list", { cache: "no-store" })
-  const data_output= await res_output.json()
+  const clean = (files: string[]) =>
+    (files ?? []).filter((f) => !f.startsWith("."))
 
-  const clean = (files: string[]) => (files ?? []).filter(f => !f.startsWith("."))
+  const first = clean(data_available.files)[0]
 
   return (
-    <div>
-      <h1>Vidéos disponibles</h1>
+    <div className="container mx-auto p-6 space-y-6">
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, 200px)",
-        gap: "10px"
-      }}>
+      <h1 className="text-2xl font-semibold">MHT</h1>
 
-        {clean(data_available.files).map((f: string) => (
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3 items-stretch">
 
-          <div key={f}>
-
+        {/* colonne 1 : video */}
+        <div className="border border-black h-full overflow-hidden rounded-lg">
+          {first ? (
             <video
-              src={`http://localhost:8000/faceswap/available/video/${encodeURIComponent(f)}`}
-              width={200}
+              src={`http://localhost:8000/faceswap/available/video/${encodeURIComponent(first)}`}
+              className="w-full aspect-video object-cover"
               autoPlay
               muted
               playsInline
               loop
             />
+          ) : (
+            <div className="w-full aspect-video grid place-items-center text-sm text-muted-foreground">
+              Aucune vidéo available
+            </div>
+          )}
+        </div>
 
-            <div>{f}</div>
+        {/* colonne 2 : upload */}
+        <UploadCard />
 
-          </div>
-
-        ))}
-      </div>
-
-      <h1>Vidéos générées</h1>
-
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, 200px)",
-        gap: "10px"
-      }}>
-
-        {clean(data_output.files).map((f: string) => (
-
-          <div key={f}>
-
-            <video
-              src={`http://localhost:8000/faceswap/output/video/${encodeURIComponent(f)}`}
-              width={200}
-              autoPlay
-              muted
-              playsInline
-              loop
-            />
-
-            <div>{f}</div>
-
-          </div>
-
-        ))}
+        {/* colonne 3 : placeholder */}
+        <div className="border border-black h-full overflow-hidden rounded-lg">
+          <img
+            src="/placeholder-face.jpg"
+            alt="Placeholder"
+            className="w-full aspect-video object-cover"
+          />
+        </div>
 
       </div>
+
     </div>
   )
 }
