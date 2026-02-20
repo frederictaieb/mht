@@ -10,9 +10,9 @@ export function Header() {
   return (
     <header className="border-b border-black/10 bg-[#efe8d8]">
       <div className="flex items-center px-3 py-2">
-        <Logo />
-        <TopNav />
-        <Login />
+        <div className="shrink-0"><Logo /></div>
+        <div className="flex-1 flex justify-center"><TopNav /></div>
+        <div className="shrink-0"><Login /></div>
       </div>
     </header>
   );
