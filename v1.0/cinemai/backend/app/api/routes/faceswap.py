@@ -206,7 +206,17 @@ def faceswap_reset():
 
 @router.get("/available/list")
 def available_list():
-    return available_service.dir_list()
+    available_dir = os.path.join(settings.VID_DIR, "available")
+    files = sorted([
+        f 
+        for f in os.listdir(available_dir)
+        if os.path.isfile(os.path.join(available_dir, f)) and not f.startswith(".")
+    ])
+
+    return {
+        "files": files
+    }
+
 
 @router.get("/output/list")
 def output_list():

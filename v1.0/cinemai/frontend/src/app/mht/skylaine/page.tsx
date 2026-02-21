@@ -5,6 +5,7 @@ export default function SkylainePage() {
     return (
         <div className="min-h-screen bg-[#efe8d8] text-[#141018]">
             <Header />
+            
         </div>
     )
 }
