@@ -4,7 +4,8 @@
 import { useRef, useState } from "react"
 import UploadImageCard from "./UploadImageCard"
 import AvailableVideoCard from "./AvailableVideoCard"
-import GeneratedVideoCard from "./GeneratedVideoCard"
+import FaceswapVideoCard from "./FaceswapVideoCard"
+import GeneratedVideoCard from "./GeneratedVideoCard copy"
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
 
@@ -22,6 +23,8 @@ export default function FaceswapRow({ vid }: Props) {
   const [generating, setGenerating] = useState(false)
   const [resultUrl, setResultUrl] = useState<string | null>(null)
   const [genError, setGenError] = useState<string | null>(null)
+
+  const [isImageReady, setIsImageReady] = useState(false)
 
   // ref sur la vidéo de gauche (si tu veux la remettre à 0)
   const leftVideoRef = useRef<HTMLVideoElement | null>(null)
@@ -78,10 +81,20 @@ export default function FaceswapRow({ vid }: Props) {
     <div className="grid gap-4 grid-cols-1 md:grid-cols-3 items-stretch">
       {/* Colonne 1 : video available */}
       <AvailableVideoCard vid={vid} videoRef={leftVideoRef} />
+      <UploadImageCard onImageUploaded = {
+        (image:File) => {
+          setIsImageReady(true)
+          console.log("FaceswapRow - Image : " + image)
+          console.log("FaceswapRow - IsImageReady : " + isImageReady)
+        }
+      }/>
+      
+      <FaceswapVideoCard isImageReady={isImageReady} />
+      
 
-
+      {/*
       <UploadImageCard onFileReady={(file: File) => {
-        if (!file) return // 👈 ne pas effacer si null
+        if (!file) return 
 
         setSelectedFile((prev) => {
           const same =
@@ -99,15 +112,9 @@ export default function FaceswapRow({ vid }: Props) {
           })
         }}
       />
+      */}
 
-      <GeneratedVideoCard
-        generating={generating}
-        resultUrl={resultUrl}
-        error={genError}
-        hasInput={!!selectedFile}
-        onDoubleClick={onGenerate}
-        onVideoCanPlay={syncLeftToZero}
-      />
+      
     </div>
   )
 }
