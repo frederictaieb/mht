@@ -1,30 +1,70 @@
 // UploadImageCard.tsx
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
-  onImageUploaded: (image: File) => void;
+  vid: string;
+  onImgUploaded: (img: string) => void;
 };
 
-export default function UploadImageCard({ onImageUploaded }: Props) {
+type UploadResponse = {
+  img_name: string;
+};
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
+
+export default function UploadImageCard({ vid, onImgUploaded }: Props) {
   // 👉 ton "pickle" (state local)
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImageUrl, setSelectedImageUrl] =  useState<string | null>(null) //
   const inputRef = useRef<HTMLInputElement | null>(null) //
   const  selectImage = () => inputRef.current?.click()
-  
 
-  const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    console.log("*** UploadImageCard - selectedImage", selectedImage)
+  }, [selectedImage])
+
+  const handleChangeImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
 
     const file = e.target.files[0];
+    if (!file) 
+      return
 
+    try {
+
+      const form = new FormData()
+      form.append("image", file)
+      form.append("name", vid )
+
+      const res = await fetch(`${API_BASE}/faceswap/upload/image`, {
+        method: "POST",
+        body: form,
+      })
+
+      if (!res.ok) {
+        const txt = await res.text()
+        throw new Error(txt || `Upload failed (${res.status})`)
+      }
+
+      const data = (await res.json()) as UploadResponse;
+
+      if (!data?.img_name) {
+        throw new Error("Réponse API invalide: img_name manquant");
+      }
+
+      onImgUploaded(data.img_name);
+
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      e.target.value = "";
+    }
+      
     // stocker dans le state (pickle)
     setSelectedImage(file);
     setSelectedImageUrl(URL.createObjectURL(file))
 
-    // envoyer au parent
-    onImageUploaded(file);
   };
 
   function renderImageContent() {

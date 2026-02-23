@@ -1,6 +1,7 @@
 # backend/app/api/routes/faceswap.py
 import os
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from pathlib import Path
 
 from app.core.config import settings
 from app.services.insightface_runtime import InsightFaceRuntime
@@ -36,7 +37,7 @@ runtime = InsightFaceRuntime(
     providers=["CPUExecutionProvider"],
 )
 
-faceswap_service = FaceSwapService(runtime, settings.IMG_DIR, settings.VID_DIR, settings.OUTPUT_DIR)
+faceswap_service = FaceSwapService(runtime, settings.IMG_DIR, settings.AVAILABLE_DIR, settings.OUTPUT_DIR)
 image_service = DirectoryService(settings.IMG_DIR, "img")
 video_service = DirectoryService(settings.VID_DIR, "vid")
 output_service = DirectoryService(settings.OUTPUT_DIR, "vid")
@@ -204,9 +205,10 @@ def faceswap_reset():
         }
     }
 
+# USE
 @router.get("/available/list")
 def available_list():
-    available_dir = os.path.join(settings.VID_DIR, "available")
+    available_dir = Path(settings.VID_DIR) / "available"
     files = sorted([
         f 
         for f in os.listdir(available_dir)
@@ -216,6 +218,35 @@ def available_list():
     return {
         "files": files
     }
+
+# USE
+@router.post("/upload/image")
+async def upload_image(
+    image: UploadFile = File(...),
+    name: str = Form(...),
+):
+    ext = ".jpg" if image.content_type == "image/jpeg" else ".png"
+
+    img_dir = Path(settings.IMG_DIR)
+    img_name =f"{Path(name).stem}{ext}"
+    path = img_dir / img_name
+
+    with path.open("wb") as f:
+        f.write(await image.read())
+
+    return {"ok": True, "img_name": img_name}
+
+# USE
+@router.post("/generate/faceswap")
+async def generate_faceswap(
+    video_name: str = Form(...),
+    image_name: str = Form(...),
+):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(
+        faceswap_executor,
+        lambda: faceswap_service.run(image_name, video_name)
+    )
 
 
 @router.get("/output/list")

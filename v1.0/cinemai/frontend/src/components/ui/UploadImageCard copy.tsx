@@ -1,46 +1,39 @@
-"use client"
+// UploadImageCard.tsx
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react";
+
+type Props = {
+  vid: string;
+  onImageUploaded: (image: File) => void;
+};
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
 
-type UploadResponse = { filename: string }
+export default function UploadImageCard({ vid, onImageUploaded }: Props) {
+  // 👉 ton "pickle" (state local)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImageUrl, setSelectedImageUrl] =  useState<string | null>(null) //
+  const inputRef = useRef<HTMLInputElement | null>(null) //
+  const  selectImage = () => inputRef.current?.click()
 
-type Props = {
-  onUploaded?: (filename: string) => void
-}
+  useEffect(() => {
+    console.log("*** UploadImageCard - selectedImage", selectedImage)
+  }, [selectedImage])
 
-export default function UploadImageCard({ onUploaded }: Props) {
-  const [preview, setPreview] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const handleChangeImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
 
-  const inputRef = useRef<HTMLInputElement | null>(null)
-
-  /**
-   * Ouvre le file picker
-   */
-  const pickFile = () => inputRef.current?.click()
-
-  /**
-   * Upload automatique dès sélection
-   */
-  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files[0];
     if (!file) 
       return
 
-    setError(null)
-    // preview immédiat
-    const url = URL.createObjectURL(file)
-    setPreview(url)
-    setUploading(true)
-
     try {
-      const form = new FormData()
-      form.append("f", file)
 
-      const res = await fetch(`${API_BASE}/faceswap/img/upload`, {
+      const form = new FormData()
+      form.append("image", file)
+      form.append("name", "01.mp4" )
+
+      const res = await fetch(`${API_BASE}/faceswap/upload/image`, {
         method: "POST",
         body: form,
       })
@@ -50,69 +43,53 @@ export default function UploadImageCard({ onUploaded }: Props) {
         throw new Error(txt || `Upload failed (${res.status})`)
       }
 
-      const data = (await res.json()) as UploadResponse
-
-      onUploaded?.(data.filename)
     } catch (e: any) {
-      setError(e?.message ?? "Erreur upload")
     } finally {
-      setUploading(false)
     }
-  }
+      
+    // stocker dans le state (pickle)
+    setSelectedImage(file);
+    setSelectedImageUrl(URL.createObjectURL(file))
 
-  /**
-   * Nettoyage mémoire du preview
-   */
-  useEffect(() => {
-    return () => {
-      if (preview) URL.revokeObjectURL(preview)
+    // envoyer au parent
+    onImageUploaded(file);
+  };
+
+  function renderImageContent() {
+    if (selectedImageUrl) {
+      return (
+        <img
+          src={selectedImageUrl}
+          className="absolute inset-0 w-full h-full object-contain"
+        />
+      );
     }
-  }, [preview])
+  
+    return (
+      <div className="absolute inset-0 grid place-items-center">
+        <span className="text-sm text-muted-foreground">
+          Cliquer pour uploader une image
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-black rounded-lg overflow-hidden flex flex-col">
-
-      {/* input file caché */}
       <input
         ref={inputRef}
         type="file"
         accept="image/png,image/jpeg"
-        onChange={onFileChange}
+        onChange={handleChangeImage}
         className="hidden"
       />
 
-      {/* zone cliquable */}
-      <div
+      <div 
         className="w-full aspect-video bg-gray-200 rounded overflow-hidden relative cursor-pointer hover:bg-gray-100 transition"
-        onClick={pickFile}
+        onClick={selectImage}
       >
-        {preview ? (
-          <img
-            src={preview}
-            alt="Preview"
-            className="absolute inset-0 w-full h-full object-contain"
-          />
-        ) : (
-          <div className="absolute inset-0 grid place-items-center">
-            <span className="text-sm text-muted-foreground">
-              Cliquer pour uploader une image
-            </span>
-          </div>
-        )}
-
-        {uploading && (
-          <div className="absolute inset-0 bg-black/40 grid place-items-center text-white text-sm">
-            Upload...
-        </div>
-        )}
+        {renderImageContent()}
       </div>
-
-      {/* erreur */}
-      {error && (
-        <div className="text-xs text-red-600 p-2">
-          {error}
-        </div>
-      )}
     </div>
-  )
+  );
 }

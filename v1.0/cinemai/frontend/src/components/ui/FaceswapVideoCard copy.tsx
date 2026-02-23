@@ -5,7 +5,7 @@ import { useState } from "react"
 
 type Props = {
   isReady: boolean; // si tu veux garder cette casse (pas recommandé)
-  img: string;
+  img: File | null
   vid: string;
 
 };
@@ -25,10 +25,8 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
     try {
 
       const form = new FormData()
-      console.log("vid:" + vid)
-      console.log("img" + img)
-      form.append("video_name", vid)
-      form.append("image_name", img)
+      form.append("video_name", "01.mp4")
+      form.append("image_name", "01.jpg" )
 
       const res = await fetch(`${API_BASE}/faceswap/generate/faceswap`, {
         method: "POST",
@@ -56,31 +54,34 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
 
   return (
     <div className="border border-black rounded-lg overflow-hidden flex flex-col">
-      <div
-        className="w-full aspect-video bg-gray-200 rounded overflow-hidden grid place-items-center cursor-pointer hover:bg-gray-100 transition"
-        onDoubleClick={handleGenerateFaceswapVideo}
-        title={isReady ? "Double-clic pour générer" : "Choisis une image d'abord"}
-      >
-      
-        {isGenerating ? (
-          <div className="text-sm text-muted-foreground">Génération en cours…</div>
-        ) : faceswapVideoUrl ? (
-          <video
-            src={faceswapVideoUrl}
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-            playsInline
-            loop
-          />
-        ) : isReady ? (
-          <div className="text-sm text-muted-foreground">
-            Double-clic pour générer
-          </div>
-        ) : (
-          <div className="text-sm text-muted-foreground">En attente d'image ...</div>
-        )}
-      </div>
+
+      {isReady ? (
+        <div
+          className="w-full aspect-video bg-gray-200 rounded overflow-hidden grid place-items-center cursor-pointer hover:bg-gray-100 transition"
+          onDoubleClick={handleGenerateFaceswapVideo}
+        >
+          <div className="text-sm text-muted-foreground">Cliquer pour générer la vidéo</div>
+        </div>
+      ) : (
+        <div
+          className="w-full aspect-video bg-gray-200 rounded overflow-hidden grid place-items-center cursor-pointer hover:bg-gray-200 transition">
+          {
+            isGenerating ? (
+              <div className="text-sm text-muted-foreground">Génération en cours…</div>
+            ):(
+              <video
+                src={faceswapVideoUrl}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted
+                playsInline
+                loop
+              />
+            )
+          } 
+        </div>
+        
+      )}
     </div>
   )
 }

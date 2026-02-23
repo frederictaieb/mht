@@ -1,9 +1,7 @@
 // AvailableVideoCard.tsx
 "use client";
 
-import type { RefObject } from "react";
-
-export default function AvailableVideoCard({vid,videoRef,}: {vid?: string; videoRef?: RefObject<HTMLVideoElement | null>;}) {
+export default function AvailableVideoCard({vid}: {vid?: string}) {
   const API_BASE =
     process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -11,7 +9,6 @@ export default function AvailableVideoCard({vid,videoRef,}: {vid?: string; video
     <div className="border border-black rounded-lg overflow-hidden flex flex-col">
       {vid ? (
         <video
-          ref={videoRef}
           src={`${API_BASE}/faceswap/available/video/${encodeURIComponent(vid)}`}
           className="w-full aspect-video object-cover"
           autoPlay

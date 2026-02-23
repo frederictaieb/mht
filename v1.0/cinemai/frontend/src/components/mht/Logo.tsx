@@ -9,6 +9,7 @@ export function Logo() {
         src="/images/mht_logo.png"
         alt="Logo"
         fill
+        sizes="(max-width: 768px) 100vw, 200px"
         className="object-contain"
       />
     </div>

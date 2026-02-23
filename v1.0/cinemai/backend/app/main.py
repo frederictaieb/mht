@@ -23,6 +23,7 @@ app.mount("/img", StaticFiles(directory=settings.IMG_DIR), name="img")
 app.mount("/output", StaticFiles(directory=settings.OUTPUT_DIR), name="output")
 
 AVAILABLE_DIR = "/Users/fete/Desktop/code/mht/v1.0/cinemai/backend/app/data/input/vid/available"
+IMAGE_DIR = "/Users/fete/Desktop/code/mht/v1.0/cinemai/backend/app/data/input/img"
 OUTPUT_DIR = "/Users/fete/Desktop/code/mht/v1.0/cinemai/backend/app/data/output"
 
 
@@ -30,6 +31,12 @@ app.mount(
     "/faceswap/available/video",
     StaticFiles(directory=AVAILABLE_DIR),
     name="available_videos",
+)
+
+app.mount(
+    "/faceswap/upload/image",
+    StaticFiles(directory=IMAGE_DIR),
+    name="uoload_images",
 )
 
 app.mount(

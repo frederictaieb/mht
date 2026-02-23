@@ -7,8 +7,13 @@ class Settings:
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # app/..
 
     IMG_DIR: str = os.path.join(BASE_DIR, "data/input/img")
+
     VID_DIR: str = os.path.join(BASE_DIR, "data/input/vid")
+    ARCHIVE_DIR = os.path.join(VID_DIR, "archive")
+    AVAILABLE_DIR = os.path.join(VID_DIR, "available")
+
     OUTPUT_DIR: str = os.path.join(BASE_DIR, "data/output")
+
 
     JOBS_FILE: str = os.path.join(BASE_DIR, "data/jobs.json")
 
