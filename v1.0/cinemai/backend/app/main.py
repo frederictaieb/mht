@@ -1,6 +1,6 @@
 #backend/app/main.py
 from fastapi import FastAPI
-from app.api.routes.faceswap import router as faceswap_router
+from app.api.cinemai import router as cinemai_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings 
@@ -18,34 +18,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-app.mount("/img", StaticFiles(directory=settings.IMG_DIR), name="img")
-app.mount("/output", StaticFiles(directory=settings.OUTPUT_DIR), name="output")
-
-AVAILABLE_DIR = "/Users/fete/Desktop/code/mht/v1.0/cinemai/backend/app/data/input/vid/available"
-IMAGE_DIR = "/Users/fete/Desktop/code/mht/v1.0/cinemai/backend/app/data/input/img"
-OUTPUT_DIR = "/Users/fete/Desktop/code/mht/v1.0/cinemai/backend/app/data/output"
-
-
 app.mount(
-    "/faceswap/available/video",
-    StaticFiles(directory=AVAILABLE_DIR),
+    "/cinemai/available_videos",
+    StaticFiles(directory=settings.AVAILABLE_DIR),
     name="available_videos",
 )
 
 app.mount(
-    "/faceswap/upload/image",
-    StaticFiles(directory=IMAGE_DIR),
+    "/cinemai/upload_image",
+    StaticFiles(directory=settings.IMG_DIR),
     name="uoload_images",
 )
 
 app.mount(
-    "/faceswap/output/video",
-    StaticFiles(directory=OUTPUT_DIR),
+    "/cinemai/output_video",
+    StaticFiles(directory=settings.OUTPUT_DIR),
     name="output_videos",
 )
 
 
-app.include_router(faceswap_router)
+app.include_router(cinemai_router)
 
 

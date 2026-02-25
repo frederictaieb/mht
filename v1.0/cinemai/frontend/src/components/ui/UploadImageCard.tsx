@@ -37,7 +37,7 @@ export default function UploadImageCard({ vid, onImgUploaded }: Props) {
       form.append("image", file)
       form.append("name", vid )
 
-      const res = await fetch(`${API_BASE}/faceswap/upload/image`, {
+      const res = await fetch(`${API_BASE}/cinemai/upload_image`, {
         method: "POST",
         body: form,
       })

@@ -30,7 +30,7 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
       form.append("video_name", vid)
       form.append("image_name", img)
 
-      const res = await fetch(`${API_BASE}/faceswap/generate/faceswap`, {
+      const res = await fetch(`${API_BASE}/cinemai/generate_faceswap`, {
         method: "POST",
         body: form,
       })
@@ -44,7 +44,7 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
       //  `${API_BASE}/faceswap/output/${encodeURIComponent(data.output_file)}`
       //)
       setFaceswapVideoUrl(
-        `${API_BASE}/faceswap/output/fs-01.mp4`
+        `${API_BASE}/cinemai/output/fs-`+vid
       )
 
 

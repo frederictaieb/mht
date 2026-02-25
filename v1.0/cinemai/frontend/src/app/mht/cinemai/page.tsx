@@ -6,12 +6,8 @@ import FaceswapBoard from "@/components/ui/FaceswapBoard";
 
 
 export default async function CinemaiPage() {
-    //const res_available = await fetch("http://localhost:8000/faceswap/available/list", {
-    //    cache: "no-store",
-    //})
-    //const data_available = await res_available.json()
 
-    const res = await fetch("http://localhost:8000/faceswap/available/list", {cache: "no-store",})
+    const res = await fetch("http://localhost:8000/cinemai/available_videos", {cache: "no-store",})
     const available_files =await res.json()
 
     return (

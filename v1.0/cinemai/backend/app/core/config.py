@@ -8,14 +8,11 @@ class Settings:
 
     IMG_DIR: str = os.path.join(BASE_DIR, "data/input/img")
 
-    VID_DIR: str = os.path.join(BASE_DIR, "data/input/vid")
-    ARCHIVE_DIR = os.path.join(VID_DIR, "archive")
-    AVAILABLE_DIR = os.path.join(VID_DIR, "available")
+    #VID_DIR: str = os.path.join(BASE_DIR, "data/input/vid")
+    ARCHIVE_DIR = os.path.join(BASE_DIR, "data/input/vid/archive")
+    AVAILABLE_DIR = os.path.join(BASE_DIR, "data/input/vid/available")
 
     OUTPUT_DIR: str = os.path.join(BASE_DIR, "data/output")
-
-
-    JOBS_FILE: str = os.path.join(BASE_DIR, "data/jobs.json")
 
     MODELS_DIR: str = os.path.join(BASE_DIR, "data/ai_models")
     SWAPPER_MODEL: str = os.path.join(MODELS_DIR, "inswapper_128.onnx")

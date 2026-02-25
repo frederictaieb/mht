@@ -2,7 +2,7 @@ import FaceswapRow from "@/components/ui/FaceswapRow"
 
 export default async function FaceswapBoard() {
 
-    const res = await fetch("http://localhost:8000/faceswap/available/list", {cache: "no-store",})
+    const res = await fetch("http://localhost:8000/cinemai/available_videos", {cache: "no-store",})
     const available_files =await res.json()
 
     return (
