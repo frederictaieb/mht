@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-def _purge_dir(path: str) -> int:
+def rm_dir(path: str) -> int:
     """
     Supprime tout le contenu d'un dossier (fichiers + sous-dossiers),
     sans supprimer le dossier lui-même.
@@ -23,7 +23,7 @@ def _purge_dir(path: str) -> int:
     return deleted
 
 
-def _copy_tree_contents(src_dir: str, dst_dir: str) -> int:
+def cp_dir(src_dir: str, dst_dir: str) -> int:
     """
     Copie le contenu de src_dir vers dst_dir (fichiers + dossiers).
     Ecrase si déjà existant.

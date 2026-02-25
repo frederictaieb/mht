@@ -15,7 +15,7 @@ import threading
 
 from fastapi.responses import FileResponse
 
-from app.utils.folder import _purge_dir, _copy_tree_contents
+from app.utils.folder import rm_dir, cp_dir
 
 from fastapi.responses import FileResponse
 
@@ -112,8 +112,8 @@ def clear_directory(folder_path: str, delete_dirs: bool = False):
 
 @router.delete("/reset")
 async def reset():
-    clear_directory("/path/folder1")
-    clear_directory("/path/folder2")
-    clear_directory("/path/folder3")
-
+    rm_dir(settings.IMG_DIR)
+    rm_dir(settings.AVAILABLE_DIR)
+    rm_dir(settings.OUTPUT_DIR)
+    cp_dir(settings.ARCHIVE_DIR, settings.AVAILABLE_DIR)
     return {"message": "Tous les dossiers ont été nettoyés"}

@@ -9,7 +9,7 @@ export default function AvailableVideoCard({vid}: {vid?: string}) {
     <div className="border border-black rounded-lg overflow-hidden flex flex-col">
       {vid ? (
         <video
-          src={`${API_BASE}/faceswap/available/video/${encodeURIComponent(vid)}`}
+          src={`${API_BASE}/cinemai/available_videos/${encodeURIComponent(vid)}`}
           className="w-full aspect-video object-cover"
           autoPlay
           muted
