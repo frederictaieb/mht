@@ -259,3 +259,28 @@ def get_output(filename: str):
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(path, media_type="video/mp4", filename=filename)
+
+def clear_directory(folder_path: str, delete_dirs: bool = False):
+    if not os.path.exists(folder_path):
+        raise HTTPException(status_code=404, detail="Dossier introuvable")
+
+    try:
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.remove(file_path)
+
+            elif os.path.isdir(file_path) and delete_dirs:
+                shutil.rmtree(file_path)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/clear-all")
+async def clear_all():
+    clear_directory("/path/folder1")
+    clear_directory("/path/folder2")
+    clear_directory("/path/folder3")
+
+    return {"message": "Tous les dossiers ont été nettoyés"}
