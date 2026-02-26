@@ -11,6 +11,11 @@ export type CinemaiRowState = {
   output_vid: string | null
 }
 
+type BoardStateResponse = {
+  rows: CinemaiRowState[]
+  required: number
+}
+
 type CinemaiContextValue = {
   rows: CinemaiRowState[]
   isLoading: boolean
@@ -19,6 +24,7 @@ type CinemaiContextValue = {
   submit: () => Promise<void>
   setInputImg: (vid: string, imgName: string | null) => void
   setOutputVid: (vid: string, outputVid: string | null) => void
+  required: number
   canSubmit: boolean
   submitLabel: string
 }
@@ -31,22 +37,27 @@ export function useCinemai() {
   return ctx
 }
 
-async function fetchBoardState(): Promise<CinemaiRowState[]> {
+async function fetchBoardState(): Promise<BoardStateResponse>{
   const res = await fetch(`${API_BASE}/cinemai/board_state`, { cache: "no-store" })
   if (!res.ok) throw new Error(await res.text())
   const data = await res.json()
-  return data.rows ?? []
+  return {
+    rows: data.rows ?? [],
+    required: Number(data.required ?? 10),
+  }
 }
 
 export function CinemaiProvider({ children }: { children: React.ReactNode }) {
   const [rows, setRows] = useState<CinemaiRowState[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [required, setRequired] = useState<number>(10)
 
   const refresh = async () => {
     setIsLoading(true)
     try {
-      const serverRows = await fetchBoardState()
-      setRows(serverRows.slice(0, 10))
+      const { rows: serverRows, required: req } = await fetchBoardState()
+      setRequired(req)
+      setRows(serverRows.slice(0, req))
     } finally {
       setIsLoading(false)
     }
@@ -56,13 +67,6 @@ export function CinemaiProvider({ children }: { children: React.ReactNode }) {
     refresh()
   }, [])
 
-  const REQUIRED = 10
-  const filledCount = useMemo(
-    () => rows.filter(r => !!r.output_vid).length,
-    [rows]
-  )
-  const canSubmit = rows.length === REQUIRED && filledCount === REQUIRED
-  const submitLabel = canSubmit ? "SUBMIT" : `(${filledCount}/${REQUIRED})`
 
   const reset = async () => {
     await fetch(`${API_BASE}/cinemai/reset`, { method: "DELETE" })
@@ -81,6 +85,10 @@ export function CinemaiProvider({ children }: { children: React.ReactNode }) {
   const setOutputVid = (vid: string, outputVid: string | null) => {
     setRows(prev => prev.map(r => (r.input_vid === vid ? { ...r, output_vid: outputVid } : r)))
   }
+  
+  const filledCount = useMemo(() => rows.filter(r => !!r.output_vid).length, [rows])
+  const canSubmit = rows.length === required && filledCount === required
+  const submitLabel = canSubmit ? "SUBMIT" : `(${filledCount}/${required})`
 
   const value = useMemo(() => ({
     rows,
@@ -90,9 +98,10 @@ export function CinemaiProvider({ children }: { children: React.ReactNode }) {
     submit,
     setInputImg,
     setOutputVid,
+    required,
     canSubmit,
     submitLabel,
-  }), [rows, isLoading, canSubmit, submitLabel])
+  }), [rows, isLoading, required, canSubmit, submitLabel])
 
   return <CinemaiContext.Provider value={value}>{children}</CinemaiContext.Provider>
 }

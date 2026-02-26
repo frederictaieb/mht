@@ -6,6 +6,7 @@ export default function ButtonsPanel() {
 
     //const { reset, submit } = useCinemai()
     const { reset, submit, canSubmit, submitLabel } = useCinemai()
+    
 
     return (
         <div className="flex justify-end gap-2">

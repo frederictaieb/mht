@@ -1,25 +1,43 @@
 # backend/app/core/config.py
 import os
-from dataclasses import dataclass
+from pathlib import Path
+from datetime import datetime
+from dotenv import load_dotenv
 
-@dataclass(frozen=True)
+
+load_dotenv()
+
+
 class Settings:
-    BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # app/..
+    def __init__(self):
+        # --- Config (.env) ---
+        self.CINEMAI_REQUIRED_VIDEOS = int(os.getenv("CINEMAI_REQUIRED_VIDEOS", 10))
 
-    IMG_DIR: str = os.path.join(BASE_DIR, "data/input/img")
+        # --- Paths ---
+        base_dir = Path(__file__).resolve().parents[1]
 
-    #VID_DIR: str = os.path.join(BASE_DIR, "data/input/vid")
-    ARCHIVE_DIR = os.path.join(BASE_DIR, "data/input/vid/archive")
-    AVAILABLE_DIR = os.path.join(BASE_DIR, "data/input/vid/available")
+        self.BASE_DIR = base_dir
 
-    OUTPUT_DIR: str = os.path.join(BASE_DIR, "data/output")
-    PROD_DIR: str = os.path.join(BASE_DIR, "data/prod")
+        self.IMG_DIR = base_dir / "data/input/img"
+        self.ARCHIVE_DIR = base_dir / "data/input/vid/archive"
+        self.AVAILABLE_DIR = base_dir / "data/input/vid/available"
 
-    MODELS_DIR: str = os.path.join(BASE_DIR, "data/ai_models")
-    SWAPPER_MODEL: str = os.path.join(MODELS_DIR, "inswapper_128.onnx")
+        self.OUTPUT_DIR = base_dir / "data/output"
 
-    # InsightFace
-    DET_SIZE: tuple = (640, 640)
-    CTX_ID: int = -1  # -1 CPU, 0 GPU
+        self.MODELS_DIR = base_dir / "data/ai_models"
+        self.SWAPPER_MODEL = self.MODELS_DIR / "inswapper_128.onnx"
 
+        # --- InsightFace ---
+        self.DET_SIZE = (640, 640)
+        self.CTX_ID = -1
+
+    @property
+    def PROD_DIR(self) -> Path:
+        today_str = datetime.now().strftime("%Y%m%d")
+        path = self.BASE_DIR / "data/prod" / today_str
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+
+# ✅ instance globale (comme avant)
 settings = Settings()

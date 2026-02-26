@@ -36,9 +36,11 @@ pillow==12.1.0
 prettytable==3.17.0
 protobuf==6.33.5
 pydantic==2.12.5
+pydantic-settings==2.13.1
 pydantic_core==2.41.5
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0
+python-dotenv==1.2.1
 python-multipart==0.0.22
 PyYAML==6.0.3
 requests==2.32.5

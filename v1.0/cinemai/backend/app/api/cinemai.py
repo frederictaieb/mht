@@ -28,7 +28,7 @@ faceswap_executor = ThreadPoolExecutor(max_workers=1)
 router = APIRouter(prefix="/cinemai", tags=["cinemai"])
 
 runtime = InsightFaceRuntime(
-    model_path=settings.SWAPPER_MODEL,
+    model_path=str(settings.SWAPPER_MODEL),
     ctx_id=settings.CTX_ID,
     det_size=settings.DET_SIZE,
     providers=["CPUExecutionProvider"],
@@ -130,13 +130,15 @@ async def reset():
 
 @router.delete("/submit")
 async def submit():
+    required = settings.CINEMAI_REQUIRED_VIDEOS
+
     vids = sorted([
         f for f in os.listdir(settings.AVAILABLE_DIR)
             if os.path.isfile(os.path.join(settings.AVAILABLE_DIR, f)) and not f.startswith(".")
-    ])[:10]
+    ])[:required]
 
-    if len(vids) != 10:
-        raise HTTPException(status_code=400, detail=f"Board incomplete: {len(vids)}/10 available videos")
+    if len(vids) != required:
+        raise HTTPException(status_code=400, detail=f"Board incomplete: {len(vids)}/{REQUIRED} available videos")
 
     missing = []
     for vid in vids:
@@ -148,7 +150,7 @@ async def submit():
         if missing:
             raise HTTPException(
                 status_code=400,
-                detail=f"Not all faceswaps generated ({10-len(missing)}/10). Missing: {missing}"
+                detail=f"Not all faceswaps generated ({REQUIRED-len(missing)}/{REQUIRED}). Missing: {missing}"
             )
 
     cp_dir(settings.OUTPUT_DIR, settings.PROD_DIR)
@@ -157,10 +159,12 @@ async def submit():
 
 @router.get("/board_state")
 def board_state():
+    required = settings.CINEMAI_REQUIRED_VIDEOS
+    
     vids = sorted([
         f for f in os.listdir(settings.AVAILABLE_DIR)
         if os.path.isfile(os.path.join(settings.AVAILABLE_DIR, f)) and not f.startswith(".")
-    ])[:10]
+    ])[:required]
 
     rows = []
     for vid in vids:
@@ -183,4 +187,4 @@ def board_state():
             "output_vid": output_vid,
         })
 
-    return {"rows": rows}
+    return {"rows": rows, "required": required}
