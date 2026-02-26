@@ -19,19 +19,19 @@ app.add_middleware(
 )
 
 app.mount(
-    "/cinemai/available_videos",
+    "/cinemai/static/available_videos",
     StaticFiles(directory=settings.AVAILABLE_DIR),
     name="available_videos",
 )
 
 app.mount(
-    "/cinemai/upload_image",
+    "/cinemai/static/upload_image",
     StaticFiles(directory=settings.IMG_DIR),
     name="uoload_images",
 )
 
 app.mount(
-    "/cinemai/output_video",
+    "/cinemai/static/output_video",
     StaticFiles(directory=settings.OUTPUT_DIR),
     name="output_videos",
 )

@@ -1,9 +1,9 @@
 //src/app/components/mht/Header.tsx
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/mht/Logo";
-import { TopNav } from "@/components/mht/TopNav";
-import { Login } from "@/components/mht/Login";
+import { Button } from "@/app/mht/components/ui/button";
+import { Logo } from "@/app/mht/components/ui/Logo";
+import { TopNav } from "@/app/mht/components/ui/TopNav";
+import { Login } from "@/app/mht/components/ui/Login";
 
 
 export function Header() {

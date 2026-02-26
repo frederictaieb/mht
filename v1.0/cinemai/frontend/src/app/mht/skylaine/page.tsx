@@ -1,5 +1,5 @@
 //src/app/mht/skylaine/page.tsx
-import { Header } from "@/components/mht/Header";
+import { Header } from "@/app/mht/components/ui/Header";
 
 export default function SkylainePage() {
     return (

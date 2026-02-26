@@ -1,7 +1,7 @@
 //src/app/mht/cinemai/page.tsx
 
-import { Header } from "@/components/mht/Header";
-import FaceswapBoard from "@/components/ui/FaceswapBoard";
+import { Header } from "@/app/mht/components/ui/Header";
+import FaceswapBoard from "@/app/mht/components/ui/cinemai/FaceswapBoard";
 
 
 

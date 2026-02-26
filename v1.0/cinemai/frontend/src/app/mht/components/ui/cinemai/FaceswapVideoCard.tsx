@@ -1,32 +1,38 @@
-//GeneratedVideoCard.tsx
+// src/app/mht/components/ui/cinemai/FaceswapVideoCard.tsx
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { useCinemai } from "@/app/mht/contexts/CinemaiContext"
 
 type Props = {
-  isReady: boolean; // si tu veux garder cette casse (pas recommandé)
-  img: string;
-  vid: string;
+  isReady: boolean
+  img: string
+  vid: string
+}
 
-};
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
+const OUTPUT_URL = (name: string) =>
+  `${API_BASE}/cinemai/static/output_video/${encodeURIComponent(name)}`
 
-export default function FaceswapVideoCard({ isReady, img, vid }: Props) { 
-
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
-
+export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
+  const { rows, setOutputVid } = useCinemai()
+  const row = rows.find(r => r.input_vid === vid)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [faceswapVideoUrl, setFaceswapVideoUrl] = useState<string | null>(null)
 
+  const outputUrl = useMemo(() => {
+    const out = row?.output_vid
+    return out ? OUTPUT_URL(out) : null
+  }, [row?.output_vid])
 
   const handleGenerateFaceswapVideo = async () => {
-    setIsGenerating(true)
-    setFaceswapVideoUrl(null)
+    if (!isReady) return
 
+    setIsGenerating(true)
     try {
+      // vider pendant génération
+      setOutputVid(vid, null)
 
       const form = new FormData()
-      console.log("vid:" + vid)
-      console.log("img" + img)
       form.append("video_name", vid)
       form.append("image_name", img)
 
@@ -35,23 +41,15 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
         body: form,
       })
 
-      if (!res.ok) {
-        const txt = await res.text()
-        throw new Error(txt || `Generation failed (${res.status})`)
-      }
+      if (!res.ok) throw new Error(await res.text())
 
-      //setFaceswapVideoUrl(
-      //  `${API_BASE}/faceswap/output/${encodeURIComponent(data.output_file)}`
-      //)
-      setFaceswapVideoUrl(
-        `${API_BASE}/cinemai/output/fs-`+vid
-      )
-
-
-    } catch (e: any) {
+      // ✅ règle exacte
+      setOutputVid(vid, `fs-${vid}`)
+    } catch (err) {
+      console.error(err)
     } finally {
       setIsGenerating(false)
-    };
+    }
   }
 
   return (
@@ -61,12 +59,11 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
         onDoubleClick={handleGenerateFaceswapVideo}
         title={isReady ? "Double-clic pour générer" : "Choisis une image d'abord"}
       >
-      
         {isGenerating ? (
           <div className="text-sm text-muted-foreground">Génération en cours…</div>
-        ) : faceswapVideoUrl ? (
+        ) : outputUrl ? (
           <video
-            src={faceswapVideoUrl}
+            src={outputUrl}
             className="w-full h-full object-cover"
             autoPlay
             muted
@@ -74,9 +71,7 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
             loop
           />
         ) : isReady ? (
-          <div className="text-sm text-muted-foreground">
-            Double-clic pour générer
-          </div>
+          <div className="text-sm text-muted-foreground">Double-clic pour générer</div>
         ) : (
           <div className="text-sm text-muted-foreground">En attente d'image ...</div>
         )}

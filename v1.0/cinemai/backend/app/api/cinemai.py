@@ -117,3 +117,33 @@ async def reset():
     rm_dir(settings.OUTPUT_DIR)
     cp_dir(settings.ARCHIVE_DIR, settings.AVAILABLE_DIR)
     return {"message": "Tous les dossiers ont été nettoyés"}
+
+@router.get("/board_state")
+def board_state():
+    vids = sorted([
+        f for f in os.listdir(settings.AVAILABLE_DIR)
+        if os.path.isfile(os.path.join(settings.AVAILABLE_DIR, f)) and not f.startswith(".")
+    ])[:10]
+
+    rows = []
+    for vid in vids:
+        stem = Path(vid).stem
+
+        # input_img: stem.jpg ou stem.png (selon upload)
+        jpg = f"{stem}.jpg"
+        png = f"{stem}.png"
+        input_img = jpg if os.path.exists(os.path.join(settings.IMG_DIR, jpg)) else (
+            png if os.path.exists(os.path.join(settings.IMG_DIR, png)) else None
+        )
+
+        # output_vid: fs-<nom video available>
+        out_name = f"fs-{vid}"
+        output_vid = out_name if os.path.exists(os.path.join(settings.OUTPUT_DIR, out_name)) else None
+
+        rows.append({
+            "input_vid": vid,
+            "input_img": input_img,
+            "output_vid": output_vid,
+        })
+
+    return {"rows": rows}
