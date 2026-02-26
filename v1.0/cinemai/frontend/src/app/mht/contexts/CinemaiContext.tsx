@@ -60,7 +60,7 @@ export function CinemaiProvider({ children }: { children: React.ReactNode }) {
   }
 
   const submit = async () => {
-    await fetch(`${API_BASE}/cinemai/submit`, { method: "GET" })
+    await fetch(`${API_BASE}/cinemai/submit`, { method: "DELETE" })
     await refresh()
   }
 

@@ -13,6 +13,7 @@ class Settings:
     AVAILABLE_DIR = os.path.join(BASE_DIR, "data/input/vid/available")
 
     OUTPUT_DIR: str = os.path.join(BASE_DIR, "data/output")
+    PROD_DIR: str = os.path.join(BASE_DIR, "data/prod")
 
     MODELS_DIR: str = os.path.join(BASE_DIR, "data/ai_models")
     SWAPPER_MODEL: str = os.path.join(MODELS_DIR, "inswapper_128.onnx")

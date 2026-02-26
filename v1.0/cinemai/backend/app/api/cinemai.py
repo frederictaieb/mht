@@ -110,13 +110,24 @@ def clear_directory(folder_path: str, delete_dirs: bool = False):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/reset")
-async def reset():
+def reset_logic():
     rm_dir(settings.IMG_DIR)
     rm_dir(settings.AVAILABLE_DIR)
     rm_dir(settings.OUTPUT_DIR)
     cp_dir(settings.ARCHIVE_DIR, settings.AVAILABLE_DIR)
-    return {"message": "Tous les dossiers ont été nettoyés"}
+    return "Folders deleted. Archives duplicated in available."
+
+
+@router.delete("/reset")
+async def reset():
+    return {"message": reset_logic()}
+
+
+@router.delete("/submit")
+async def submit():
+    cp_dir(settings.OUTPUT_DIR, settings.PROD_DIR)
+    msg = reset_logic()
+    return {"message": msg + " Videos in prod. Ready for diffusion."}
 
 @router.get("/board_state")
 def board_state():
