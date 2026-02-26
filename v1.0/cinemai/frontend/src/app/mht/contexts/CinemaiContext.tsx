@@ -19,6 +19,8 @@ type CinemaiContextValue = {
   submit: () => Promise<void>
   setInputImg: (vid: string, imgName: string | null) => void
   setOutputVid: (vid: string, outputVid: string | null) => void
+  canSubmit: boolean
+  submitLabel: string
 }
 
 const CinemaiContext = createContext<CinemaiContextValue | null>(null)
@@ -54,6 +56,14 @@ export function CinemaiProvider({ children }: { children: React.ReactNode }) {
     refresh()
   }, [])
 
+  const REQUIRED = 10
+  const filledCount = useMemo(
+    () => rows.filter(r => !!r.output_vid).length,
+    [rows]
+  )
+  const canSubmit = rows.length === REQUIRED && filledCount === REQUIRED
+  const submitLabel = canSubmit ? "SUBMIT" : `(${filledCount}/${REQUIRED})`
+
   const reset = async () => {
     await fetch(`${API_BASE}/cinemai/reset`, { method: "DELETE" })
     await refresh()
@@ -80,7 +90,9 @@ export function CinemaiProvider({ children }: { children: React.ReactNode }) {
     submit,
     setInputImg,
     setOutputVid,
-  }), [rows, isLoading])
+    canSubmit,
+    submitLabel,
+  }), [rows, isLoading, canSubmit, submitLabel])
 
   return <CinemaiContext.Provider value={value}>{children}</CinemaiContext.Provider>
 }

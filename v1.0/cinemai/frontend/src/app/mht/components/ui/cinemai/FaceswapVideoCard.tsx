@@ -15,7 +15,7 @@ const OUTPUT_URL = (name: string) =>
   `${API_BASE}/cinemai/static/output_video/${encodeURIComponent(name)}`
 
 export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
-  const { rows, setOutputVid } = useCinemai()
+  const { rows, setOutputVid, refresh } = useCinemai()
   const row = rows.find(r => r.input_vid === vid)
   const [isGenerating, setIsGenerating] = useState(false)
 
@@ -42,9 +42,9 @@ export default function FaceswapVideoCard({ isReady, img, vid }: Props) {
       })
 
       if (!res.ok) throw new Error(await res.text())
+        
+      await refresh()
 
-      // ✅ règle exacte
-      setOutputVid(vid, `fs-${vid}`)
     } catch (err) {
       console.error(err)
     } finally {

@@ -110,23 +110,49 @@ def clear_directory(folder_path: str, delete_dirs: bool = False):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-def reset_logic():
+def reset_logic(delete_prod):
+    msg = "img, available, output"
+    if delete_prod:
+        msg = msg + ", prod"
+        rm_dir(settings.PROD_DIR)
     rm_dir(settings.IMG_DIR)
     rm_dir(settings.AVAILABLE_DIR)
     rm_dir(settings.OUTPUT_DIR)
     cp_dir(settings.ARCHIVE_DIR, settings.AVAILABLE_DIR)
-    return "Folders deleted. Archives duplicated in available."
+    msg = msg + " deleted. Archives duplicated in available."
+    return msg
 
 
 @router.delete("/reset")
 async def reset():
-    return {"message": reset_logic()}
+    return {"message": reset_logic(True)}
 
 
 @router.delete("/submit")
 async def submit():
+    vids = sorted([
+        f for f in os.listdir(settings.AVAILABLE_DIR)
+            if os.path.isfile(os.path.join(settings.AVAILABLE_DIR, f)) and not f.startswith(".")
+    ])[:10]
+
+    if len(vids) != 10:
+        raise HTTPException(status_code=400, detail=f"Board incomplete: {len(vids)}/10 available videos")
+
+    missing = []
+    for vid in vids:
+        out_name = f"fs-{vid}"
+        out_path = os.path.join(settings.OUTPUT_DIR, out_name)
+        if not os.path.exists(out_path):
+            missing.append(out_name)
+
+        if missing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Not all faceswaps generated ({10-len(missing)}/10). Missing: {missing}"
+            )
+
     cp_dir(settings.OUTPUT_DIR, settings.PROD_DIR)
-    msg = reset_logic()
+    msg = reset_logic(False)
     return {"message": msg + " Videos in prod. Ready for diffusion."}
 
 @router.get("/board_state")
