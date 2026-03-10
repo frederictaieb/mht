@@ -25,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 faceswap_executor = ThreadPoolExecutor(max_workers=1)
 
-router = APIRouter(prefix="/cinemai", tags=["cinemai"])
+cinemai_router = APIRouter(prefix="/cinemai", tags=["cinemai"])
 
 runtime = InsightFaceRuntime(
     model_path=str(settings.SWAPPER_MODEL),
@@ -39,7 +39,7 @@ faceswap_service = FaceSwapService(runtime, settings.IMG_DIR, settings.AVAILABLE
 faceswap_executor = ThreadPoolExecutor(max_workers=1)
 
 # List all the available videos
-@router.get("/available_videos")
+@cinemai_router.get("/available_videos")
 def available_videos():
     available_dir = settings.AVAILABLE_DIR
     files = sorted([
@@ -53,7 +53,7 @@ def available_videos():
     }
 
 # Upload Image
-@router.post("/upload_image")
+@cinemai_router.post("/upload_image")
 async def upload_image(
     image: UploadFile = File(...),
     name: str = Form(...),
@@ -70,7 +70,7 @@ async def upload_image(
     return {"ok": True, "img_name": img_name}
 
 # Create Faceswap from available video et uploaded photo
-@router.post("/generate_faceswap")
+@cinemai_router.post("/generate_faceswap")
 async def generate_faceswap(
     video_name: str = Form(...),
     image_name: str = Form(...),
@@ -86,7 +86,7 @@ async def generate_faceswap(
 #def output_list():
 #    return output_service.dir_list()
 
-@router.get("/output/{filename}")
+@cinemai_router.get("/output/{filename}")
 def get_output(filename: str):
     path = os.path.join(settings.OUTPUT_DIR, filename)
     if not os.path.exists(path):
@@ -123,12 +123,12 @@ def reset_logic(delete_prod):
     return msg
 
 
-@router.delete("/reset")
+@cinemai_router.delete("/reset")
 async def reset():
     return {"message": reset_logic(True)}
 
 
-@router.delete("/submit")
+@cinemai_router.delete("/submit")
 async def submit():
     required = settings.CINEMAI_REQUIRED_VIDEOS
 
@@ -157,7 +157,7 @@ async def submit():
     msg = reset_logic(False)
     return {"message": msg + " Videos in prod. Ready for diffusion."}
 
-@router.get("/board_state")
+@cinemai_router.get("/board_state")
 def board_state():
     required = settings.CINEMAI_REQUIRED_VIDEOS
     

@@ -1,6 +1,10 @@
 #backend/app/main.py
 from fastapi import FastAPI
-from app.api.cinemai import router as cinemai_router
+
+from app.api.cinemai import cinemai_router
+from app.api.telepai import telepai_router
+
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings 
@@ -38,5 +42,8 @@ app.mount(
 
 
 app.include_router(cinemai_router)
+app.include_router(telepai_router)
+
+
 
 

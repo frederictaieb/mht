@@ -38,6 +38,5 @@ class Settings:
         path.mkdir(parents=True, exist_ok=True)
         return path
 
-
 # ✅ instance globale (comme avant)
 settings = Settings()
