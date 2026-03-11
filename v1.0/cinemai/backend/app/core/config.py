@@ -18,11 +18,11 @@ class Settings:
 
         self.BASE_DIR = base_dir
 
-        self.IMG_DIR = base_dir / "data/input/img"
-        self.ARCHIVE_DIR = base_dir / "data/input/vid/archive"
-        self.AVAILABLE_DIR = base_dir / "data/input/vid/available"
+        self.IMG_DIR = base_dir / "data/cinemai/input/img"
+        self.ARCHIVE_DIR = base_dir / "data/cinemai/input/vid/archive"
+        self.AVAILABLE_DIR = base_dir / "data/cinemai/input/vid/available"
 
-        self.OUTPUT_DIR = base_dir / "data/output"
+        self.OUTPUT_DIR = base_dir / "data/cinemai/output"
 
         self.MODELS_DIR = base_dir / "data/ai_models"
         self.SWAPPER_MODEL = self.MODELS_DIR / "inswapper_128.onnx"
@@ -34,7 +34,7 @@ class Settings:
     @property
     def PROD_DIR(self) -> Path:
         today_str = datetime.now().strftime("%Y%m%d")
-        path = self.BASE_DIR / "data/prod" / today_str
+        path = self.BASE_DIR / "data/cinemai/prod" / today_str
         path.mkdir(parents=True, exist_ok=True)
         return path
 
