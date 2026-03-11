@@ -8,8 +8,10 @@ from faster_whisper import WhisperModel
 from qwen_tts import Qwen3TTSModel, VoiceClonePromptItem
 from starlette.concurrency import run_in_threadpool
 
+from dataclasses import dataclass, field
 
-class telepai_services:
+
+class TelepaiServices:
     def __init__(self) -> None:
         self.model_stt = WhisperModel(
             "small",
@@ -74,7 +76,7 @@ class telepai_services:
         return output_path
 
 
-telepai_service = telepai_services()
+telepai_service = TelepaiServices()
 
 
 class Actress:
@@ -83,23 +85,28 @@ class Actress:
     default_ref_text: str
     default_voice_clone_prompt: list[VoiceClonePromptItem] | None
 
-    def __init__(self, name: str, default_ref_audio: str) -> None:
-        self.name = name
-        self.default_ref_audio = default_ref_audio.strip()
-        self.default_ref_text = ""
-        self.default_voice_clone_prompt = None
+@dataclass
+class Actress:
+    name: str
+    default_ref_audio: str
+    default_ref_text: str = ""
+    default_voice_clone_prompt: list[VoiceClonePromptItem] | None = field(default=None)
 
-    async def create_voice_clone_prompt(self) -> list[VoiceClonePromptItem]:
-        result = await telepai_service.stt(self.default_ref_audio)
+    @classmethod
+    async def create(cls, name: str, default_ref_audio: str):
+        self = cls(name, default_ref_audio)
+
+        result = await telepai_service.stt(default_ref_audio)
         self.default_ref_text = result["stt"]
 
         self.default_voice_clone_prompt = await telepai_service.create_voice_clone_prompt(
             self.default_ref_text,
-            self.default_ref_audio,
+            default_ref_audio,
         )
-        return self.default_voice_clone_prompt
 
-    async def generate_voice_clone(self, new_text: str) -> str:
+        return self
+
+    async def say(self, new_text: str) -> str:
         if self.default_voice_clone_prompt is None:
             raise ValueError("default_voice_clone_prompt is missing")
 
@@ -111,35 +118,10 @@ class Actress:
             output_path=output_path,
         )
 
-    def __str__(self):
-        prompt_count = (
-            len(self.default_voice_clone_prompt)
-            if self.default_voice_clone_prompt is not None
-            else 0
-        )
-
-        return (
-            f"{self.name}\n"
-            f"{self.default_ref_audio}\n"
-            f"{self.default_ref_text}\n"
-            f"voice_clone_prompt items: {prompt_count}\n"
-        )
-
-
 async def main():
-    actress = Actress(
-        name="Yolanda",
-        default_ref_audio="1.wav",
-    )
-
-    await actress.create_voice_clone_prompt()
-    print(actress)
-
-    output_file = await actress.generate_voice_clone(
-        "Bonjour, ceci est un test de clonage de voix, et je suis tres content de cloner cette voix ! Bonjour, ceci est un test de clonage de voix, et je suis tres content de cloner cette voix ! Bonjour, ceci est un test de clonage de voix, et je suis tres content de cloner cette voix ! Bonjour, ceci est un test de clonage de voix, et je suis tres content de cloner cette voix ! Bonjour, ceci est un test de clonage de voix, et je suis tres content de cloner cette voix !"
-    )
+    actress = await Actress.create("Yolanda", "1.wav")
+    output_file = await actress.say("Bonjour, ceci est un test de clonage de voix.")
     print("Fichier généré :", output_file)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
