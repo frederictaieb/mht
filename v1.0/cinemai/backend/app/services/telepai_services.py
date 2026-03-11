@@ -74,14 +74,12 @@ class TelepaiServices:
         self,
         voice_clone_prompt: list[VoiceClonePromptItem],
         new_text: str,
-        instruct: str | None = None,
         output_path: str = "output_voice_clone_1.wav"
     ) -> str:
         wavs, sr = await run_in_threadpool(
             lambda: self.model_qwen.generate_voice_clone(
                 text=new_text,
                 language="French",
-                instruct=instruct,
                 voice_clone_prompt=voice_clone_prompt,
             )
         )
@@ -139,7 +137,7 @@ class Actress:
 
         return self
 
-    async def say(self, new_text: str, instruct: str | None = None,) -> str:
+    async def say(self, new_text: str) -> str:
         if self.default_voice_clone_prompt is None:
             raise ValueError("default_voice_clone_prompt is missing")
 
@@ -148,6 +146,5 @@ class Actress:
         return await self.telepai_service.generate_voice_clone(
             voice_clone_prompt=self.default_voice_clone_prompt,
             new_text=new_text,
-            instruct=instruct,
             output_path=output_path,
         )

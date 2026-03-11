@@ -34,18 +34,19 @@ async def create_actress(name: str = Form(...), file: UploadFile = File(...)):
     )
 
 
-@telepai_router.post("/actresses/{name}/say", response_model=SayResponse)
-async def actress_say(name: str, text: str = Form(...), instruct: str | None = Form(None)):
+@telepai_router.post("/{name}/say", response_model=SayResponse)
+async def actress_say(name: str, text: str = Form(...)):
     actress = telepai_service.get_actress(name)
-    output_file = await actress.say(text, instruct)
+    file_path = await actress.say(text)
 
     return SayResponse(
         actress_name=name,
-        output_file=output_file,
+        file_path=file_path,
+        audio_url=f"/telepai/{name}/get"
     )
 
 
-@telepai_router.get("/actresses/{name}/audio")
+@telepai_router.get("/{name}/get")
 async def get_actress_audio(name: str):
     actress = telepai_service.get_actress(name)
     output_path = os.path.join("app/data/telepai/output", f"{actress.name}_voice_clone.wav")
