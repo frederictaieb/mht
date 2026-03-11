@@ -1,4 +1,3 @@
-// src/app/mht/components/ui/cinemai/UploadImageCard.tsx
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
@@ -13,12 +12,15 @@ type UploadResponse = { img_name: string }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
 
-const INPUT_IMG_URL = (imgName: string) =>
-  `${API_BASE}/cinemai/static/upload_image/${encodeURIComponent(imgName)}`
+const INPUT_IMG_URL = (imgName: string, version?: number) =>
+  `${API_BASE}/cinemai/static/upload_image/${encodeURIComponent(imgName)}${version ? `?v=${version}` : ""}`
 
 export default function UploadImageCard({ vid, imgName, onImgUploaded }: Props) {
+
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [serverImageVersion, setServerImageVersion] = useState<number>(Date.now())
+
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   const selectImage = () => inputRef.current?.click()
@@ -29,18 +31,32 @@ export default function UploadImageCard({ vid, imgName, onImgUploaded }: Props) 
     }
   }, [localPreviewUrl])
 
+  useEffect(() => {
+    if (!imgName) {
+      setLocalPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev)
+        return null
+      })
+      setServerImageVersion(Date.now())
+    }
+  }, [imgName])
+
   const handleChangeImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+
     const file = e.target.files?.[0]
     if (!file) return
 
     const url = URL.createObjectURL(file)
+
     setLocalPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev)
       return url
     })
 
     setIsUploading(true)
+
     try {
+
       const form = new FormData()
       form.append("image", file)
       form.append("name", vid)
@@ -53,22 +69,33 @@ export default function UploadImageCard({ vid, imgName, onImgUploaded }: Props) 
       if (!res.ok) throw new Error(await res.text())
 
       const data = (await res.json()) as UploadResponse
-      if (!data?.img_name) throw new Error("Réponse API invalide: img_name manquant")
+
+      if (!data?.img_name) {
+        throw new Error("Réponse API invalide : img_name manquant")
+      }
+
+      setServerImageVersion(Date.now())
 
       onImgUploaded(data.img_name)
+
     } catch (err) {
-      console.error(err)
+
+      console.error("Upload error:", err)
+
     } finally {
+
       setIsUploading(false)
       e.target.value = ""
+
     }
   }
 
-  // priorité à l’image serveur (persistante)
-  const displayUrl = imgName ? INPUT_IMG_URL(imgName) : localPreviewUrl
+  const displayUrl =
+    localPreviewUrl ?? (imgName ? INPUT_IMG_URL(imgName, serverImageVersion) : null)
 
   return (
     <div className="border border-black rounded-lg overflow-hidden flex flex-col">
+
       <input
         ref={inputRef}
         type="file"
@@ -81,6 +108,7 @@ export default function UploadImageCard({ vid, imgName, onImgUploaded }: Props) 
         className="w-full aspect-video bg-gray-200 rounded overflow-hidden relative cursor-pointer hover:bg-gray-100 transition"
         onClick={selectImage}
       >
+
         {displayUrl ? (
           <img
             src={displayUrl}
@@ -89,15 +117,20 @@ export default function UploadImageCard({ vid, imgName, onImgUploaded }: Props) 
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center">
-            <span className="text-sm text-muted-foreground">Cliquer pour uploader une image</span>
+            <span className="text-sm text-muted-foreground">
+              Cliquer pour uploader une image
+            </span>
           </div>
         )}
 
         {isUploading && (
           <div className="absolute inset-0 grid place-items-center bg-white/60">
-            <span className="text-sm text-muted-foreground">Upload…</span>
+            <span className="text-sm text-muted-foreground">
+              Upload…
+            </span>
           </div>
         )}
+
       </div>
     </div>
   )

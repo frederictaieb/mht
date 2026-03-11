@@ -6,18 +6,12 @@ from pathlib import Path
 from app.core.config import settings
 from app.services.insightface_runtime import InsightFaceRuntime
 from app.services.faceswap_service import FaceSwapService
-from app.models.faceswap import FaceSwapSingleRequest
 
-import uuid
+from fastapi.responses import FileResponse
+
 import shutil
 
-import threading
-
-from fastapi.responses import FileResponse
-
 from app.utils.folder import rm_dir, cp_dir
-
-from fastapi.responses import FileResponse
 
 # app/api/cinemai.py
 import asyncio
@@ -93,23 +87,6 @@ def get_output(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(path, media_type="video/mp4", filename=filename)
 
-def clear_directory(folder_path: str, delete_dirs: bool = False):
-    if not os.path.exists(folder_path):
-        raise HTTPException(status_code=404, detail="Dossier introuvable")
-
-    try:
-        for filename in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, filename)
-
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.remove(file_path)
-
-            elif os.path.isdir(file_path) and delete_dirs:
-                shutil.rmtree(file_path)
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 def reset_logic(delete_prod):
     msg = "img, available, output"
     if delete_prod:
@@ -138,7 +115,7 @@ async def submit():
     ])[:required]
 
     if len(vids) != required:
-        raise HTTPException(status_code=400, detail=f"Board incomplete: {len(vids)}/{REQUIRED} available videos")
+        raise HTTPException(status_code=400, detail=f"Board incomplete: {len(vids)}/{required} available videos")
 
     missing = []
     for vid in vids:
@@ -147,11 +124,11 @@ async def submit():
         if not os.path.exists(out_path):
             missing.append(out_name)
 
-        if missing:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Not all faceswaps generated ({REQUIRED-len(missing)}/{REQUIRED}). Missing: {missing}"
-            )
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Not all faceswaps generated ({required-len(missing)}/{required}). Missing: {missing}"
+        )
 
     cp_dir(settings.OUTPUT_DIR, settings.PROD_DIR)
     msg = reset_logic(False)

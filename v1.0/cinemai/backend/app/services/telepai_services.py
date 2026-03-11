@@ -1,5 +1,5 @@
+# backend/app/services/telepai_services.py
 import os
-import asyncio
 
 import torch
 import soundfile as sf
@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 
 class TelepaiServices:
     def __init__(self) -> None:
+
         self.model_stt = WhisperModel(
             "small",
             device="cpu",
@@ -26,7 +27,9 @@ class TelepaiServices:
             attn_implementation="sdpa" if torch.cuda.is_available() else None,
         )
 
-    async def stt(self, file_path: str) -> dict:
+        self.actresses: dict[str, "Actress"] = {}
+
+    async def stt(self, file_path: str) -> str:
         try:
             if not file_path:
                 raise HTTPException(status_code=400, detail="Aucun fichier fourni.")
@@ -38,13 +41,13 @@ class TelepaiServices:
                 lambda: self.model_stt.transcribe(file_path, beam_size=5)
             )
 
-            result = " ".join(segment.text.strip() for segment in segments if getattr(segment, "text", None) and segment.text.strip()).strip()
+            result = " ".join(
+                segment.text.strip()
+                for segment in segments
+                if getattr(segment, "text", None) and segment.text.strip()
+            ).strip()
 
-            return {
-                "stt": result,
-                "language": getattr(info, "language", None),
-                "language_probability": getattr(info, "language_probability", None),
-            }
+            return result
 
         except HTTPException:
             raise
@@ -54,7 +57,11 @@ class TelepaiServices:
                 detail=f"Erreur pendant la transcription : {e}",
             )
 
-    async def create_voice_clone_prompt(self, ref_text: str, file_path: str) -> list[VoiceClonePromptItem]:
+    async def create_voice_clone_prompt(
+        self,
+        ref_text: str,
+        file_path: str
+    ) -> list[VoiceClonePromptItem]:
         return await run_in_threadpool(
             lambda: self.model_qwen.create_voice_clone_prompt(
                 ref_text=ref_text,
@@ -63,41 +70,67 @@ class TelepaiServices:
             )
         )
 
-    async def generate_voice_clone(self, voice_clone_prompt: list[VoiceClonePromptItem], new_text: str, output_path: str = "output_voice_clone_1.wav") -> str:
+    async def generate_voice_clone(
+        self,
+        voice_clone_prompt: list[VoiceClonePromptItem],
+        new_text: str,
+        instruct: str | None = None,
+        output_path: str = "output_voice_clone_1.wav"
+    ) -> str:
         wavs, sr = await run_in_threadpool(
             lambda: self.model_qwen.generate_voice_clone(
                 text=new_text,
                 language="French",
+                instruct=instruct,
                 voice_clone_prompt=voice_clone_prompt,
             )
         )
 
+        output_dir = os.path.dirname(output_path)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+
         await run_in_threadpool(lambda: sf.write(output_path, wavs[0], sr))
         return output_path
+    
+    async def create_actress(self, name: str, ref_audio_path: str) -> "Actress":
+        actress = await Actress.create(
+            name=name,
+            default_ref_audio=ref_audio_path,
+            telepai_service=self,
+        )
+        self.actresses[name] = actress
+        return actress
 
+    def get_actress(self, name: str) -> "Actress":
+        actress = self.actresses.get(name)
+        if actress is None:
+            raise HTTPException(status_code=404, detail=f"Actrice '{name}' introuvable.")
+        return actress
 
-telepai_service = TelepaiServices()
-
-
-class Actress:
-    name: str
-    default_ref_audio: str
-    default_ref_text: str
-    default_voice_clone_prompt: list[VoiceClonePromptItem] | None
 
 @dataclass
 class Actress:
     name: str
     default_ref_audio: str
+    telepai_service: TelepaiServices
     default_ref_text: str = ""
     default_voice_clone_prompt: list[VoiceClonePromptItem] | None = field(default=None)
 
     @classmethod
-    async def create(cls, name: str, default_ref_audio: str):
-        self = cls(name, default_ref_audio)
+    async def create(
+        cls,
+        name: str,
+        default_ref_audio: str,
+        telepai_service: TelepaiServices
+    ) -> "Actress":
+        self = cls(
+            name=name,
+            default_ref_audio=default_ref_audio,
+            telepai_service=telepai_service,
+        )
 
-        result = await telepai_service.stt(default_ref_audio)
-        self.default_ref_text = result["stt"]
+        self.default_ref_text = await telepai_service.stt(default_ref_audio)
 
         self.default_voice_clone_prompt = await telepai_service.create_voice_clone_prompt(
             self.default_ref_text,
@@ -106,23 +139,15 @@ class Actress:
 
         return self
 
-    async def say(self, new_text: str) -> str:
+    async def say(self, new_text: str, instruct: str | None = None,) -> str:
         if self.default_voice_clone_prompt is None:
             raise ValueError("default_voice_clone_prompt is missing")
 
-        output_path = f"{self.name}_voice_clone.wav"
+        output_path = os.path.join("app/data/telepai/output", f"{self.name}_voice_clone.wav")
 
-        return await telepai_service.generate_voice_clone(
+        return await self.telepai_service.generate_voice_clone(
             voice_clone_prompt=self.default_voice_clone_prompt,
             new_text=new_text,
+            instruct=instruct,
             output_path=output_path,
         )
-
-async def main():
-    actress = await Actress.create("Yolanda", "1.wav")
-    output_file = await actress.say("Bonjour, ceci est un test de clonage de voix.")
-    print("Fichier généré :", output_file)
-
-if __name__ == "__main__":
-    #Exec
-    asyncio.run(main())

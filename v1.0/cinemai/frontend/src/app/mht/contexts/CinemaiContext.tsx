@@ -69,12 +69,22 @@ export function CinemaiProvider({ children }: { children: React.ReactNode }) {
 
 
   const reset = async () => {
-    await fetch(`${API_BASE}/cinemai/reset`, { method: "DELETE" })
+    const res = await fetch(`${API_BASE}/cinemai/reset`, {
+      method: "DELETE",
+    })
+    if (!res.ok) {
+      throw new Error(await res.text())
+    }
     await refresh()
   }
-
+  
   const submit = async () => {
-    await fetch(`${API_BASE}/cinemai/submit`, { method: "DELETE" })
+    const res = await fetch(`${API_BASE}/cinemai/submit`, {
+      method: "DELETE",
+    })
+    if (!res.ok) {
+      throw new Error(await res.text())
+    }
     await refresh()
   }
 
