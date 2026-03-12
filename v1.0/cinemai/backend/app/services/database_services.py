@@ -1,11 +1,13 @@
-# backend/app/services/database_service.py
+# backend/app/services/database_services.py
 
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
+from app.utils.logger import get_logger
 
+logger = get_logger(__name__)
 
-class DatabaseService:
+class DatabaseServices:
     def __init__(self, db_path: str, sql_dir: str) -> None:
         self.db_path = db_path
         self.sql_dir = Path(sql_dir)
@@ -30,10 +32,12 @@ class DatabaseService:
         with self.get_connection() as conn:
             conn.executescript(sql)
 
-    def init_tables(self) -> None:
+    def create_tables(self) -> None:
+        logger.info("Creating Database")
         self.execute_sql_file("create_tables.sql")
 
     def fill_tables(self) -> None:
+        logger.info("Filling Database")
         self.execute_sql_file("fill_tables.sql")
 
     def is_actress_table_empty(self) -> bool:
