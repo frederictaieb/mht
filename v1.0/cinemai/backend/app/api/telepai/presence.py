@@ -29,7 +29,7 @@ def create_presence(presence: PresenceCreate, db: Session = Depends(get_db)):
     return db_presence
 
 
-@router.get("/", response_model=list[PresenceResponse])
+@router.get("/all", response_model=list[PresenceResponse])
 def get_all_presences(db: Session = Depends(get_db)):
     return crud_get_all_presences(db)
 

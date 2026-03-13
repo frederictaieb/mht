@@ -25,7 +25,7 @@ def create_speech(speech: SpeechCreate, db: Session = Depends(get_db)):
     return db_speech
 
 
-@router.get("/", response_model=list[SpeechResponse])
+@router.get("/all", response_model=list[SpeechResponse])
 def get_all_speeches(db: Session = Depends(get_db)):
     return crud_get_all_speeches(db)
 

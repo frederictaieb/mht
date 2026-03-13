@@ -20,7 +20,7 @@ def create_avatar(avatar: AvatarCreate, db: Session = Depends(get_db)):
     return crud_create_avatar(avatar, db)
 
 
-@router.get("/", response_model=list[AvatarResponse])
+@router.get("/all", response_model=list[AvatarResponse])
 def get_all_avatars(db: Session = Depends(get_db)):
     return crud_get_all_avatars(db)
 

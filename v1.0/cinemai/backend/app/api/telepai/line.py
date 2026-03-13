@@ -29,7 +29,7 @@ def create_line(line: LineCreate, db: Session = Depends(get_db)):
     return db_line
 
 
-@router.get("/", response_model=list[LineResponse])
+@router.get("/all", response_model=list[LineResponse])
 def get_all_lines(db: Session = Depends(get_db)):
     return crud_get_all_lines(db)
 

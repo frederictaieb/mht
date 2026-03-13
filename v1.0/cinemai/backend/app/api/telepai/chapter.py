@@ -20,8 +20,8 @@ def create(chapter: ChapterCreate, db: Session = Depends(get_db)):
     return create_chapter(chapter, db)
 
 
-@router.get("/", response_model=list[ChapterResponse])
-def get_all(db: Session = Depends(get_db)):
+@router.get("/all", response_model=list[ChapterResponse])
+def get_all_chapters(db: Session = Depends(get_db)):
     return get_all_chapters(db)
 
 

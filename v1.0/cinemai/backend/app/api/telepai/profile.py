@@ -128,7 +128,7 @@ async def create(
 
 
 @router.get("/all", response_model=list[ProfileResponse])
-def get_all(db: Session = Depends(get_db)):
+def get_all_profiles(db: Session = Depends(get_db)):
     return get_all_profiles(db)
 
 
