@@ -21,10 +21,10 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.telepai.profile import ProfileResponse
 from app.crud.telepai.profile import (
-    create_profile,
-    get_all_profiles,
-    get_profile,
-    delete_profile
+    create_profile as crud_create_profile,
+    get_all_profiles as crud_get_all_profiles,
+    get_profile as crud_get_profile,
+    delete_profile as crud_delete_profile
 )
 from app.services.telepai_services import TelepaiServices
 
@@ -88,7 +88,7 @@ async def create(
             ensure_ascii=False
         )
 
-        db_profile = create_profile(
+        db_profile = crud_create_profile(
             avatar_id=avatar_id,
             audio_reference_path=file_path,
             note=note,
@@ -129,13 +129,13 @@ async def create(
 
 @router.get("/all", response_model=list[ProfileResponse])
 def get_all_profiles(db: Session = Depends(get_db)):
-    return get_all_profiles(db)
+    return crud_get_all_profiles(db)
 
 
 @router.get("/{profile_id}", response_model=ProfileResponse)
 def get(profile_id: int, db: Session = Depends(get_db)):
 
-    db_profile = get_profile(profile_id, db)
+    db_profile = crud_get_profile(profile_id, db)
 
     if db_profile is None:
         raise HTTPException(status_code=404, detail="Profile not found")
@@ -146,7 +146,7 @@ def get(profile_id: int, db: Session = Depends(get_db)):
 @router.delete("/{profile_id}")
 def delete(profile_id: int, db: Session = Depends(get_db)):
 
-    db_profile = delete_profile(profile_id, db)
+    db_profile = crud_delete_profile(profile_id, db)
 
     if db_profile is None:
         raise HTTPException(status_code=404, detail="Profile not found")
