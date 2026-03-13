@@ -1,13 +1,9 @@
 #backend/app/main.py
-
-from app.utils.logger import setup_logging, get_logger
-setup_logging()
-
+from app.utils.logger import setup_logging
 from fastapi import FastAPI
 
 from app.api.cinemai import cinemai_router
 from app.api.telepai import telepai_router
-
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -15,20 +11,30 @@ from app.core.config import settings
 
 from app.services.database_services import DatabaseServices
 
-logger = get_logger(__name__)
-logger.info("Starting FastAPI...")
+
+from app.db.database import SessionLocal, engine, Base
+
+setup_logging()
+
 app = FastAPI()
 
-@app.on_event("startup")
-def startup_event():
-    db_service = DatabaseServices(
-        db_path="app/data/mht.db",
-        sql_dir="app/db",
-    )
-    db_service.create_tables()
 
-    if db_service.is_actress_table_empty():
-        db_service.fill_tables()
+#@app.on_event("startup")
+#def startup_event():
+
+
+#    db_service = DatabaseServices(
+#        db_path="app/data/mht.db",
+#        sql_dir="app/db",
+#    )
+#    db_service.create_tables()
+
+#    if db_service.is_actress_table_empty():
+#        db_service.fill_tables()
+
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,

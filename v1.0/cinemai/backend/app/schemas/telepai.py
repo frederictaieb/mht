@@ -56,3 +56,18 @@ class MonologueLineCreateRequest(BaseModel):
 class GenerateMonologueLineAudioRequest(BaseModel):
     monologue_line_id: int
     output_dir: str | None = "app/data/generated_audio"
+
+
+### NOUVEAU
+
+
+class ActressCreate(BaseModel):
+    name: str
+
+
+class ActressResponse(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True

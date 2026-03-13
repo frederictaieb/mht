@@ -2,22 +2,21 @@ import logging
 from uvicorn.logging import DefaultFormatter
 
 
-def setup_logging(level=logging.INFO) -> None:
-    handler = logging.StreamHandler()
+def setup_logging():
+    logger = logging.getLogger()
 
+    if logger.handlers:
+        return logger
+
+    handler = logging.StreamHandler()
     handler.setFormatter(
         DefaultFormatter(
-            fmt="%(levelprefix)-9s | %(name)s:%(funcName)s:%(lineno)d | %(message)s",
-            use_colors=True
+            fmt="%(levelprefix)-9s | %(name)s | %(funcName)s:%(lineno)d | %(message)s",
+            use_colors=True,
         )
     )
 
-    root_logger = logging.getLogger()
-    root_logger.setLevel(level)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
 
-    if not root_logger.handlers:
-        root_logger.addHandler(handler)
-
-
-def get_logger(name: str) -> logging.Logger:
-    return logging.getLogger(name)
+    return logger

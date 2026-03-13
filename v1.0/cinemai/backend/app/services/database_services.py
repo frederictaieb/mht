@@ -1,11 +1,12 @@
 # backend/app/services/database_services.py
 
+import logging
+
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
-from app.utils.logger import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 class DatabaseServices:
     def __init__(self, db_path: str, sql_dir: str) -> None:

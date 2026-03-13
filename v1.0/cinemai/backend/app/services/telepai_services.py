@@ -20,11 +20,27 @@ class TelepaiServices:
             compute_type="int8",
         )
 
+        #self.model_qwen = Qwen3TTSModel.from_pretrained(
+        #    "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+        #    device_map="cuda:0" if torch.cuda.is_available() else "cpu",
+        #    dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
+        #    attn_implementation="sdpa" if torch.cuda.is_available() else None,
+        #)
+
+        qwen_path = "/Users/fete/Desktop/code/mht/v1.0/cinemai/backend/app/data/ai_models/Qwen3-TTS-12Hz-1.7B-Base"
+
+        qwen_kwargs = {
+            "dtype": torch.bfloat16 if torch.cuda.is_available() else torch.float32,
+            "local_files_only": True,
+        }
+
+        if torch.cuda.is_available():
+            qwen_kwargs["device_map"] = "cuda:0"
+            qwen_kwargs["attn_implementation"] = "sdpa"
+
         self.model_qwen = Qwen3TTSModel.from_pretrained(
-            "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
-            device_map="cuda:0" if torch.cuda.is_available() else "cpu",
-            dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-            attn_implementation="sdpa" if torch.cuda.is_available() else None,
+            qwen_path,
+            **qwen_kwargs,
         )
 
         self.actresses: dict[str, "Actress"] = {}
