@@ -2,11 +2,11 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class ProfileCreate(BaseModel):
-    avatar_id: int
-    audio_reference_path: str
-    note: str | None = None
-    prompt_voice_clone_json: str
+#class ProfileCreate(BaseModel):
+#    avatar_id: int
+#    audio_reference_path: str
+#    note: str | None = None
+#    prompt_voice_clone_json: str
 
 
 class ProfileResponse(BaseModel):

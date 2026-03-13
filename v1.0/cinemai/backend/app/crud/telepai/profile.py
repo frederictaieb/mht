@@ -2,21 +2,26 @@
 from sqlalchemy.orm import Session
 from app.models.telepai.avatar import Avatar
 from app.models.telepai.profile import Profile
-from app.schemas.telepai.profile import ProfileCreate
+#from app.schemas.telepai.profile import ProfileCreate
 
 
-def create_profile(profile: ProfileCreate, db: Session):
-
-    avatar = db.query(Avatar).filter(Avatar.id == profile.avatar_id).first()
+def create_profile(
+    avatar_id: int,
+    audio_reference_path: str,
+    note: str | None,
+    prompt_voice_clone_json: str,
+    db: Session
+):
+    avatar = db.query(Avatar).filter(Avatar.id == avatar_id).first()
 
     if avatar is None:
         return None
 
     db_profile = Profile(
-        avatar_id=profile.avatar_id,
-        audio_reference_path=profile.audio_reference_path,
-        note=profile.note,
-        prompt_voice_clone_json=profile.prompt_voice_clone_json
+        avatar_id=avatar_id,
+        audio_reference_path=audio_reference_path,
+        note=note,
+        prompt_voice_clone_json=prompt_voice_clone_json
     )
 
     db.add(db_profile)
@@ -24,6 +29,28 @@ def create_profile(profile: ProfileCreate, db: Session):
     db.refresh(db_profile)
 
     return db_profile
+
+#def create_profile(profile: ProfileCreate, db: Session):
+
+#    avatar = db.query(Avatar).filter(Avatar.id == profile.avatar_id).first()
+
+#    if avatar is None:
+#        return None
+
+#    db_profile = Profile(
+#        avatar_id=profile.avatar_id,
+#        audio_reference_path=profile.audio_reference_path,
+#        note=profile.note,
+#        prompt_voice_clone_json=profile.prompt_voice_clone_json
+#    )
+
+#    db.add(db_profile)
+#    db.commit()
+#    db.refresh(db_profile)
+
+#    return db_profile
+
+
 
 
 def get_all_profiles(db: Session):
