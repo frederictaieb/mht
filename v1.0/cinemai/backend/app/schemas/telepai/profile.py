@@ -17,3 +17,6 @@ class ProfileResponse(BaseModel):
     prompt_voice_clone_json: str
 
     model_config = ConfigDict(from_attributes=True)
+
+class ProfileSayRequest(BaseModel):
+    text: str

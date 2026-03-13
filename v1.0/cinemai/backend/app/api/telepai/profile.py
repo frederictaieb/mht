@@ -17,10 +17,11 @@ import uuid
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.telepai.profile import ProfileResponse
+from app.schemas.telepai.profile import ProfileResponse, ProfileSayRequest
 from app.crud.telepai.profile import (
     create_profile as crud_create_profile,
     get_all_profiles as crud_get_all_profiles,
@@ -29,15 +30,72 @@ from app.crud.telepai.profile import (
 )
 
 from app.services.telepai_services import TelepaiServices
-from app.utils.serializers import serialize_voice_clone_prompt_item
+
+from app.utils.serializers import (
+    serialize_voice_clone_prompt_item,
+    deserialize_voice_clone_prompt,
+)
 
 router = APIRouter(prefix="/profile", tags=["Profile"])
 
 ##########
 logger = logging.getLogger(__name__)
 UPLOAD_DIR = "app/data/telepai/input"
+OUTPUT_DIR = "app/data/telepai/output"
 telepai_service = TelepaiServices()
 
+@router.post("/{profile_id}/say")
+async def say(
+    profile_id: int,
+    payload: ProfileSayRequest,
+    db: Session = Depends(get_db),
+):
+    db_profile = crud_get_profile(profile_id, db)
+
+    if db_profile is None:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    text = payload.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Text is required")
+
+    if not db_profile.prompt_voice_clone_json:
+        raise HTTPException(status_code=400, detail="Profile has no voice clone prompt")
+
+    try:
+        voice_clone_prompt = deserialize_voice_clone_prompt(
+            db_profile.prompt_voice_clone_json
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Impossible de désérialiser le voice clone prompt : {e}"
+        )
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    output_filename = f"profile_{profile_id}_{uuid.uuid4()}.wav"
+    output_path = os.path.join(OUTPUT_DIR, output_filename)
+
+    try:
+        generated_path = await telepai_service.generate_voice_clone(
+            voice_clone_prompt=voice_clone_prompt,
+            new_text=text,
+            output_path=output_path,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur pendant la génération audio : {e}"
+        )
+
+    if not os.path.isfile(generated_path):
+        raise HTTPException(status_code=500, detail="Le fichier audio généré est introuvable")
+
+    return FileResponse(
+        path=generated_path,
+        media_type="audio/wav",
+        filename=os.path.basename(generated_path),
+    )
 
 @router.post("/", response_model=ProfileResponse)
 async def create(
