@@ -1,3 +1,4 @@
+# backend/app/models/telepai/speech.py
 from sqlalchemy import Column, Integer, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.database import Base

@@ -1,3 +1,4 @@
+# backend/app/models/telepai/line.py
 from sqlalchemy import Column, Integer, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.db.database import Base

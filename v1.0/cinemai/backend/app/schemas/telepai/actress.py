@@ -1,3 +1,4 @@
+# backend/app/schemas/telepai/actress.py
 from pydantic import BaseModel, ConfigDict
 
 class ActressCreate(BaseModel):

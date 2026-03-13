@@ -1,3 +1,4 @@
+# backend/app/api/routes/telepai/profile.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 

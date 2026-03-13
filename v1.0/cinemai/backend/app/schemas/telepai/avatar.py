@@ -1,3 +1,4 @@
+# backend/app/schemas/telepai/avatar.py
 from pydantic import BaseModel, ConfigDict
 
 class AvatarCreate(BaseModel):

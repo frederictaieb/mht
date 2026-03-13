@@ -1,3 +1,4 @@
+# backend/app/schemas/telepai/speech.py
 from pydantic import BaseModel, ConfigDict
 
 

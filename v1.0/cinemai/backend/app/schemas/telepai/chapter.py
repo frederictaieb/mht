@@ -1,3 +1,4 @@
+# backend/app/schemas/telepai/chapter.py
 from pydantic import BaseModel, ConfigDict
 
 class ChapterCreate(BaseModel):

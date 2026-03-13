@@ -1,3 +1,4 @@
+# backend/app/models/telepai/presence.py
 from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.db.database import Base

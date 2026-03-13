@@ -1,3 +1,4 @@
+# backend/app/models/telepai/actress.py
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from app.db.database import Base

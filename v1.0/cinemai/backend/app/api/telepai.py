@@ -19,11 +19,8 @@ from sqlalchemy.orm import Session
 from app.models.telepai import Actress
 from app.schemas.telepai import ActressResponse
 
-
 telepai_router = APIRouter(prefix="/telepai", tags=["telepai"])
 telepai_service = TelepaiServices()
-
-
 
 #@telepai_router.post("/create_actress", response_model=CreateActressResponse)
 #async def create_actress_old(name: str = Form(...), file: UploadFile = File(...)):
@@ -74,37 +71,37 @@ telepai_service = TelepaiServices()
 
 ###
 
-@telepai_router.post("/actress/create", response_model=ActressCreate)
-def create_actress(actress: ActressCreate, db: Session = Depends(get_db)):
-    db_actress = Actress(name=actress.name)
-    db.add(db_actress)
-    db.commit()
-    db.refresh(db_actress)
-    return db_actress
+#@telepai_router.post("/actress/create", response_model=ActressCreate)
+#def create_actress(actress: ActressCreate, db: Session = Depends(get_db)):
+#    db_actress = Actress(name=actress.name)
+#    db.add(db_actress)
+#    db.commit()
+#    db.refresh(db_actress)
+#    return db_actress
 
-@telepai_router.get("/actress/all", response_model=list[ActressResponse])
-def get_all_actresses(db: Session = Depends(get_db)):
-    return db.query(Actress).all()
+#@telepai_router.get("/actress/all", response_model=list[ActressResponse])
+#def get_all_actresses(db: Session = Depends(get_db)):
+#    return db.query(Actress).all()
 
-@telepai_router.delete("/actress/delete/{actress_id}")
-def delete_actress(actress_id: int, db: Session = Depends(get_db)):
-    db_actress = db.query(Actress).filter(Actress.id == actress_id).first()
+#@telepai_router.delete("/actress/delete/{actress_id}")
+#def delete_actress(actress_id: int, db: Session = Depends(get_db)):
+#    db_actress = db.query(Actress).filter(Actress.id == actress_id).first()
 
-    if db_actress is None:
-        raise HTTPException(status_code=404, detail="Actress not found")
+#    if db_actress is None:
+#        raise HTTPException(status_code=404, detail="Actress not found")
         
-    db.delete(db_actress)
-    db.commit()
-    return {"message": "Actress deleted successfully"}
+#    db.delete(db_actress)
+#    db.commit()
+#    return {"message": "Actress deleted successfully"}
 
-@telepai_router.get("/actress/{actress_id}", response_model=ActressResponse)
-def get_actress(actress_id: int, db: Session = Depends(get_db)):
-    db_actress = db.query(Actress).filter(Actress.id == actress_id).first()
+#@telepai_router.get("/actress/{actress_id}", response_model=ActressResponse)
+#def get_actress(actress_id: int, db: Session = Depends(get_db)):
+#    db_actress = db.query(Actress).filter(Actress.id == actress_id).first()
 
-    if db_actress is None:
-        raise HTTPException(status_code=404, detail="Actress not found")
+#    if db_actress is None:
+#        raise HTTPException(status_code=404, detail="Actress not found")
     
-    return db_actress
+#    return db_actress
 
 
 #@telepai_router.get("/actresses", response_model=list[ActressResponse])

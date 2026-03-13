@@ -1,3 +1,4 @@
+# backend/app/crud/telepai/chapter.py
 from sqlalchemy.orm import Session
 from app.models.telepai.chapter import Chapter
 from app.schemas.telepai.chapter import ChapterCreate

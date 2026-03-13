@@ -1,3 +1,4 @@
+# backend/app/crud/telepai/profile.py
 from sqlalchemy.orm import Session
 from app.models.telepai.avatar import Avatar
 from app.models.telepai.profile import Profile

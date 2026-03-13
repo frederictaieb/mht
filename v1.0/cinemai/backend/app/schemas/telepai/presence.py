@@ -1,3 +1,4 @@
+# backend/app/schemas/telepai/presence.py
 from pydantic import BaseModel, ConfigDict
 
 

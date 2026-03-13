@@ -1,3 +1,4 @@
+# backend/app/crud/telepai/presence.py
 from sqlalchemy.orm import Session
 from app.models.telepai.presence import Presence
 from app.models.telepai.chapter import Chapter

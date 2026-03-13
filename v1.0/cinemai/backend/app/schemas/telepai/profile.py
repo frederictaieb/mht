@@ -1,3 +1,4 @@
+# backend/app/schemas/telepai/profile.py
 from pydantic import BaseModel, ConfigDict
 
 

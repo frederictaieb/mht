@@ -1,3 +1,4 @@
+# backend/app/crud/telepai/speech.py
 from sqlalchemy.orm import Session
 from app.models.telepai.speech import Speech
 from app.schemas.telepai.speech import SpeechCreate

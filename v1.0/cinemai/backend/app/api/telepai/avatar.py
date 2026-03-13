@@ -1,3 +1,5 @@
+# backend/app/api/routes/telepai/avatar.py
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
