@@ -59,12 +59,24 @@ async def say(
     if not text:
         raise HTTPException(status_code=400, detail="Text is required")
 
-    if not db_profile.prompt_voice_clone_json:
-        raise HTTPException(status_code=400, detail="Profile has no voice clone prompt")
+    #if not db_profile.prompt_voice_clone_json:
+    #    raise HTTPException(status_code=400, detail="Profile has no voice clone prompt")
+
+
+    #logger.info("create_voice_clone_prompt")
+
+
+        # Sérialisation JSON pour stockage BDD
+        #logger.info("prompt_voice_clone_json")
+        #prompt_voice_clone_json = json.dumps(
+        #    [serialize_voice_clone_prompt_item(item) for item in voice_clone_prompt],
+        #    ensure_ascii=False
+        #)
 
     try:
-        voice_clone_prompt = deserialize_voice_clone_prompt(
-            db_profile.prompt_voice_clone_json
+        voice_clone_prompt = await telepai_service.create_voice_clone_prompt(
+            ref_text=db_profile.ref_text,
+            file_path=db_profile.audio_reference_path
         )
     except Exception as e:
         raise HTTPException(
@@ -145,25 +157,25 @@ async def create(
             logger.info("stt")
             final_ref_text = await telepai_service.stt(file_path)
 
-        logger.info("create_voice_clone_prompt")
-        voice_clone_prompt = await telepai_service.create_voice_clone_prompt(
-            ref_text=final_ref_text,
-            file_path=file_path,
-        )
+        #logger.info("create_voice_clone_prompt")
+        #voice_clone_prompt = await telepai_service.create_voice_clone_prompt(
+        #    ref_text=final_ref_text,
+        #    file_path=file_path,
+        #)
 
         # Sérialisation JSON pour stockage BDD
-        logger.info("prompt_voice_clone_json")
-        prompt_voice_clone_json = json.dumps(
-            [serialize_voice_clone_prompt_item(item) for item in voice_clone_prompt],
-            ensure_ascii=False
-        )
+        #logger.info("prompt_voice_clone_json")
+        #prompt_voice_clone_json = json.dumps(
+        #    [serialize_voice_clone_prompt_item(item) for item in voice_clone_prompt],
+        #    ensure_ascii=False
+        #)
 
         logger.info("crud_create_profile")
         db_profile = crud_create_profile(
             avatar_id=avatar_id,
             audio_reference_path=file_path,
+            ref_text=final_ref_text,
             note=note,
-            prompt_voice_clone_json=prompt_voice_clone_json,
             db=db,
         )
 

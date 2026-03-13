@@ -9,7 +9,7 @@ def create_profile(
     avatar_id: int,
     audio_reference_path: str,
     note: str | None,
-    prompt_voice_clone_json: str,
+    ref_text: str,
     db: Session
 ):
     avatar = db.query(Avatar).filter(Avatar.id == avatar_id).first()
@@ -21,7 +21,7 @@ def create_profile(
         avatar_id=avatar_id,
         audio_reference_path=audio_reference_path,
         note=note,
-        prompt_voice_clone_json=prompt_voice_clone_json
+        ref_text=ref_text
     )
 
     db.add(db_profile)

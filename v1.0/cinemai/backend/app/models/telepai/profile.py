@@ -11,7 +11,7 @@ class Profile(Base):
     avatar_id = Column(Integer, ForeignKey("avatar.id", ondelete="CASCADE"), nullable=False)
     audio_reference_path = Column(String, nullable=False)
     note = Column(Text)
-    prompt_voice_clone_json = Column(Text, nullable=False)
+    ref_text = Column(Text)
 
     avatar = relationship("Avatar", back_populates="profiles")
     lines = relationship("Line", back_populates="profile", cascade="all, delete-orphan")

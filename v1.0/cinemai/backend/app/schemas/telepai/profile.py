@@ -14,7 +14,7 @@ class ProfileResponse(BaseModel):
     avatar_id: int
     audio_reference_path: str
     note: str | None
-    prompt_voice_clone_json: str
+    ref_text: str
 
     model_config = ConfigDict(from_attributes=True)
 
