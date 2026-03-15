@@ -13,7 +13,8 @@ def create_speech(speech: SpeechCreate, db: Session):
     db_speech = Speech(
         presence_id=speech.presence_id,
         #title=speech.title
-        title=f"{db_presence.avatar.name} : {db_presence.chapter.chapter_number}"
+        title=f"{db_presence.avatar.name} : {db_presence.chapter.chapter_number}",
+        conent=SpeechCreate.content
     )
 
     db.add(db_speech)

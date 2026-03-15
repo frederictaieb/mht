@@ -10,6 +10,8 @@ class Speech(Base):
     id = Column(Integer, primary_key=True, index=True)
     presence_id = Column(Integer, ForeignKey("presence.id", ondelete="CASCADE"), nullable=False)
     title = Column(Text, nullable=True)
+    content = Column(Text, nullable=True)
+
 
     presence = relationship("Presence", back_populates="speeches")
     lines = relationship("Line", back_populates="speech", cascade="all, delete-orphan")

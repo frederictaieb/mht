@@ -9,10 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings 
 
-from app.services.database_services import DatabaseServices
+from app.db.init_db import init_db
 
-
-from app.db.database import SessionLocal, engine, Base
 
 setup_logging()
 
@@ -34,7 +32,7 @@ app = FastAPI()
 
 @app.on_event("startup")
 def startup():
-    Base.metadata.create_all(bind=engine)
+    init_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,7 +54,7 @@ app.mount(
 app.mount(
     "/cinemai/static/upload_image",
     StaticFiles(directory=settings.IMG_DIR),
-    name="uoload_images",
+    name="upload_images",
 )
 
 app.mount(

@@ -7,7 +7,7 @@ from app.schemas.telepai.actress import ActressCreate
 from app.db.session import get_db
 
 def create_actress(actress: ActressCreate, db: Session = Depends(get_db)):
-    db_actress = Actress(name=actress.name)
+    db_actress = Actress(name=actress.name.lower())
     db.add(db_actress)
     db.commit()
     db.refresh(db_actress)

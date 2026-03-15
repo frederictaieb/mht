@@ -27,7 +27,7 @@ def create_line(line: LineCreate, db: Session):
         speech_id=line.speech_id,
         profile_id=line.profile_id,
         line_order=line.line_order,
-        text=line.text
+        content=line.content
     )
 
     db.add(db_line)

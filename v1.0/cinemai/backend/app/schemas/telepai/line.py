@@ -6,7 +6,7 @@ class LineCreate(BaseModel):
     speech_id: int
     profile_id: int
     line_order: int
-    text: str
+    content: str
 
 
 class LineResponse(BaseModel):
@@ -14,6 +14,6 @@ class LineResponse(BaseModel):
     speech_id: int
     profile_id: int
     line_order: int
-    text: str
+    content: str
 
     model_config = ConfigDict(from_attributes=True)

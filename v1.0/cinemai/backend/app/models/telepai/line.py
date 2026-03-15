@@ -14,7 +14,7 @@ class Line(Base):
     speech_id = Column(Integer, ForeignKey("speech.id", ondelete="CASCADE"), nullable=False)
     profile_id = Column(Integer, ForeignKey("profile.id", ondelete="CASCADE"), nullable=False)
     line_order = Column(Integer, nullable=False)
-    text = Column(Text, nullable=False)
+    content = Column(Text, nullable=False)
 
     speech = relationship("Speech", back_populates="lines")
     profile = relationship("Profile")
