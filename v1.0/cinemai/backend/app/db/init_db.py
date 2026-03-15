@@ -50,8 +50,8 @@ def seed_data() -> None:
         seed_speeches(db)
         db.flush()
 
-        seed_lines(db)
-        db.flush()
+        #seed_lines(db)
+        #db.flush()
 
         #logger.info("Seeding Speeches")
         #logger.info("Seeding Lines")
